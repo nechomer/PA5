@@ -125,6 +125,7 @@ public class DispatchTableBuilder {
 	          dispatchTable += "# class " + className + "\n# Dispatch vector:\n" + 
 	        		  getDispatchTable(className) + "\n" + getfieldOffsetsCommentString(className) + "\n";
 	    }
+	    dispatchTable += "# End of dispatch table section\n";	
 	    return dispatchTable;
 	  }
 

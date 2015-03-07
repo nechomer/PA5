@@ -280,7 +280,7 @@ public class StringsBuilder implements Visitor {
 			tmp = iter.next();
 			str += strings.get(tmp) + ":	\"" + tmp + "\""+ "\n";
 		}
-			
+		str += "# End of constant strings section\n";	
 		return str;
 	}
 	

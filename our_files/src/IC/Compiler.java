@@ -3,6 +3,7 @@ package IC;
 import IC.AST.*;
 import IC.Parser.*;
 import IC.SemanticChecks.*;
+import IC.asm.AsmTranslator;
 import IC.lir.DispatchTableBuilder;
 import IC.lir.LirTranslator;
 import IC.lir.StringsBuilder;
@@ -123,8 +124,11 @@ public class Compiler {
 				FileWriter fw = new FileWriter(lirFileName);
 				fw.write(lir);
 				fw.close();
+				AsmTranslator asmTranslator = new AsmTranslator(lirFileName);
+				asmTranslator.translateLirToAsm();
      		}
-	
+     		
+     	
     	} catch (ParserException | SemanticException | LexicalError e) {
     		System.out.println(e.getMessage());
     		//System.exit(1);
