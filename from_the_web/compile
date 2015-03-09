@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# export CLASSPATH=<enter path to your .class files and java-cup-v11a-runtime.jar>
+# Example: export CLASSPATH=$CLASSPATH:E:/compilation/wcc06/IC_COMPILER/classes:E:/compilation/wcc06/IC_COMPILER/java-cup-v11a-runtime.jar
+# Note the use of the forward slash / instead of the backward slass \
+# java IC.Compiler $1.ic
+
+as -o ./$1.o ./$1.s
+ld -o ./$1.exe ./$1.o /lib/crt0.o libic.a -lcygwin -lkernel32
