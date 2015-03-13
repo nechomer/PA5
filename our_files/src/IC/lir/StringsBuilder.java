@@ -270,11 +270,23 @@ public class StringsBuilder implements Visitor {
 		return null;
 	}
 
-	
+	public static String exportStringLirTableForAsm() {
+		String str = null;
+		String tmp;
+		str = buildErrorStrings(true);
+		Iterator<String> iter = strings.keySet().iterator();
+		while(iter.hasNext()) {
+			tmp = iter.next();
+			str += strings.get(tmp) + ": .string"	\"" + tmp + "\""+ "\n";
+		}
+			
+		return str;
+	}
+
 	public static String exportStringLirTable() {
 		String str = null;
 		String tmp;
-		str = buildErrorStrings();
+		str = buildErrorStrings(false);
 		Iterator<String> iter = strings.keySet().iterator();
 		while(iter.hasNext()) {
 			tmp = iter.next();
@@ -284,11 +296,12 @@ public class StringsBuilder implements Visitor {
 		return str;
 	}
 	
-	private static String buildErrorStrings() {
-		String str = "str_err_null_ptr_ref:		\"Runtime Error: Null pointer dereference!\"\n";
-		str+= "str_err_arr_out_of_bounds:	\"Runtime Error: Array index out of bounds!\"\n";
-		str+= "str_err_neg_arr_size:	\"Runtime Error: Array allocation with negative array size!\"\n";
-		str+= "str_err_div_by_zero:	\"Runtime Error: Division by zero!\"\n";
+	private static String buildErrorStrings(boolean forAsm) {
+
+		String str = "str_err_null_ptr_ref:	"+ (forAsm)? ".string":"" +"	\"Runtime Error: Null pointer dereference!\"\n";
+		str+= "str_err_arr_out_of_bounds: "+ (forAsm)? ".string":"" +"	\"Runtime Error: Array index out of bounds!\"\n";
+		str+= "str_err_neg_arr_size: "+ (forAsm)? ".string":"" +"	\"Runtime Error: Array allocation with negative array size!\"\n";
+		str+= "str_err_div_by_zero: "+ (forAsm)? ".string":"" +"	\"Runtime Error: Division by zero!\"\n";
 		return str;
 	}
 	
