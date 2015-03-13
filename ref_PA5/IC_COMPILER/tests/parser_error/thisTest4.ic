@@ -1,0 +1,3 @@
+class this {
+     void foo(int a){ }
+}

@@ -1,0 +1,16 @@
+// Regular strings
+"pizza"
+"n";
+
+// Empty string
+"";
+
+// Escape chars
+"/n";
+"/tn";
+
+// Bad escapes - should be an error
+"\b"
+
+// Unterminated strings - should be an error
+"

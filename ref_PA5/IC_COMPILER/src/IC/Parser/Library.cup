@@ -1,0 +1,136 @@
+package IC.Parser;
+import IC.AST.*;
+import java.util.List;
+import java.util.ArrayList;
+////////////////////////////////////////////
+// Symbol list (terminals and non-terminals)
+
+//terminal Token       BOOLEAN;  // boolean
+//terminal Token       CLASS;    // class
+//terminal Token       CLASS_ID; // ClassName
+//terminal Token       COMMA;    // ,
+//terminal Token       ID;       // someName
+//terminal Token       INT;      // int
+//terminal Token       LB;       // [
+//terminal Token       LCBR;     // {
+//terminal Token       LP;       // (
+//terminal Token       RB;       // ]
+//terminal Token       RCBR;     // }
+//terminal Token       RP;       // )
+//terminal Token       SEMI;     // ;
+//terminal Token       STATIC;   // static
+//terminal Token       STRING;   // string
+//terminal Token       VOID;     // void
+
+terminal Token  ASSIGN;   // =
+terminal Token  BOOLEAN;  // boolean
+terminal Token  BREAK;    // break
+terminal Token  CLASS;    // class
+terminal Token  CLASS_ID; // ClassName
+terminal Token  COMMA;    // ,
+terminal Token  CONTINUE; // continue
+terminal Token  DIVIDE;   // /
+terminal Token  DOT;      // .
+terminal Token  EQUAL;    // =
+terminal Token  EXTENDS;  // extends
+terminal Token  ELSE;     // else
+terminal Token  FALSE;    // false
+terminal Token  GT;       // >
+terminal Token  GTE;      // >=
+terminal Token  ID;       // someName
+terminal Token  IF;       // if
+terminal Token  INT;      // int
+terminal Token  INTEGER;  // 1234
+terminal Token  LAND;     // &&
+terminal Token  LB;       // [
+terminal Token  LCBR;     // {
+terminal Token  LP;       // (
+terminal Token  LENGTH;   // length
+terminal Token  LNEG;     // !
+terminal Token  LOR;      // ||
+terminal Token  LT;       // <
+terminal Token  LTE;      // <=
+terminal Token  MINUS;    // -
+terminal Token  MOD;      // %
+terminal Token  MULTIPLY; // *
+terminal Token  NEQUAL;   // !=
+terminal Token  NEW;      // new
+terminal Token  NULL;     // null
+terminal Token  PLUS;     // +
+terminal Token  RB;       // ]
+terminal Token  RCBR;     // }
+terminal Token  RETURN;   // return
+terminal Token  RP;       // )
+terminal Token  SEMI;     // ;
+terminal Token  STATIC;   // static
+terminal Token  STRING;   // string
+terminal Token  QUOTE;    // "Hello"
+terminal Token  THIS;     // this
+terminal Token  TRUE;     // true
+terminal Token  VOID;     // void
+terminal Token  WHILE;    // while
+//
+terminal        UMINUS;   // - (for the cases of -6, etc.)
+
+nonterminal ICClass             LIBIC;
+nonterminal List<Method>        LIBMETHODS;
+nonterminal LibraryMethod       LIBMETHOD;
+nonterminal List<Formal>        FORMALS;
+nonterminal List<Formal>        FORMALS_LIST;
+nonterminal Type                TYPE;
+
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+/// The Grammar                                    ///
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+
+start with LIBIC;
+//////////////////////////////////////////////////////
+/// Program                                        ///
+//////////////////////////////////////////////////////
+LIBIC           ::= CLASS CLASS_ID:c LCBR RCBR
+                    | CLASS CLASS_ID:c LCBR LIBMETHODS:ls RCBR
+                    {: if (c.getValue().equals("Library"))
+                           RESULT = new ICClass(c.getLine(), c.getValue(), new ArrayList<Field>(0), ls);
+                       else
+                           parser.report_fatal_error ("Error! The name of the library class should be \"Library\" and not \"" + c.getValue() +"\"", null);
+                    :};
+
+LIBMETHODS      ::= LIBMETHOD:l
+                    {: RESULT = new ArrayList<Method>(); RESULT.add (l); :}
+                                   | LIBMETHOD:l LIBMETHODS:ls
+                    {: RESULT = ls; ls.add(0, l); :}
+                                   ;
+
+LIBMETHOD        ::= STATIC TYPE:t ID:id FORMALS_LIST:f SEMI
+                    {: RESULT = new LibraryMethod (t, id.getValue(), f); :}
+                    | STATIC VOID:v ID:id FORMALS_LIST:f SEMI
+                    {: RESULT = new LibraryMethod (new PrimitiveType(v.getLine(), IC.DataTypes.VOID), id.getValue(), f); :}
+                    ;
+
+// The parameters of a function
+FORMALS            ::= TYPE:t ID:id
+                    {: RESULT = new ArrayList<Formal>(); RESULT.add (new Formal (t, id.getValue())); :}
+                    |
+                    FORMALS:f COMMA TYPE:t ID:id
+                    {: RESULT = f; f.add (new Formal (t, id.getValue())); :}
+                    ;
+
+FORMALS_LIST       ::=  LP RP
+                     {: RESULT = new ArrayList<Formal>(); :}
+                     |
+                     LP FORMALS:f RP
+                     {: RESULT = f; :}
+                     ;
+TYPE              ::= INT:n
+                    {: RESULT = new PrimitiveType(n.getLine(), IC.DataTypes.INT); :}
+                    | BOOLEAN:b
+                    {: RESULT = new PrimitiveType(b.getLine(), IC.DataTypes.BOOLEAN); :}
+                    | STRING:s
+                    {: RESULT = new PrimitiveType(s.getLine(), IC.DataTypes.STRING); :}
+                    | CLASS_ID:c
+                    {: RESULT = new UserType(c.getLine(), c.getValue()); :}
+                    | TYPE:type LB RB
+                    {: RESULT = type; type.incrementDimension(); :}
+                    ;

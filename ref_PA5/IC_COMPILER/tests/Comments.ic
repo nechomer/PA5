@@ -1,0 +1,17 @@
+/* an error with number 0123 "n" "\n" "" 0 123 /n /t */
+
+
+/* multiline error
+ *
+ * is fun */
+
+
+// an error with number 0123 "n" "\n" "" 0 123 */ /n /t likewise
+
+
+// This should produce an error:
+// /*
+    */
+
+// An unterminated comment:
+/*

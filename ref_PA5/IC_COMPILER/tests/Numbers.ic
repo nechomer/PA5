@@ -1,0 +1,17 @@
+// Parse a regular number
+123;
+
+// Parse a regular number and zero
+0 123;
+
+// Should produce an error (illegal identifier)
+123a4;
+
+// Should produce an error about leading zeros
+0123 ;
+
+// Report out of range numbers...
+999999999999999999999999999999999999999999999999999999999999999999999999
+
+// This should also be an error (illegal identifier)
+123_

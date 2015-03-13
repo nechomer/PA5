@@ -1,0 +1,405 @@
+package IC.Parser;
+
+import IC.AST.*;
+import java.util.List;
+import java.util.LinkedList;
+
+////////////////////////////////////////////
+// Symbol list (terminals and non-terminals)
+
+terminal Token  ASSIGN;   // =
+terminal Token  BOOLEAN;  // boolean
+terminal Token  BREAK;    // break
+terminal Token  CLASS;    // class
+terminal Token  CLASS_ID; // ClassName
+terminal Token  COMMA;    // ,
+terminal Token  CONTINUE; // continue
+terminal Token  DIVIDE;   // /
+terminal Token  DOT;      // .
+terminal Token  EQUAL;    // =
+terminal Token  EXTENDS;  // extends
+terminal Token  ELSE;     // else
+terminal Token  FALSE;    // false
+terminal Token  GT;       // >
+terminal Token  GTE;      // >=
+terminal Token  ID;       // someName
+terminal Token  IF;       // if
+terminal Token  INT;      // int
+terminal Token  INTEGER;  // 1234
+terminal Token  LAND;     // &&
+terminal Token  LB;       // [
+terminal Token  LCBR;     // {
+terminal Token  LP;       // (
+terminal Token  LENGTH;   // length
+terminal Token  LNEG;     // !
+terminal Token  LOR;      // ||
+terminal Token  LT;       // <
+terminal Token  LTE;      // <=
+terminal Token  MINUS;    // -
+terminal Token  MOD;      // %
+terminal Token  MULTIPLY; // *
+terminal Token  NEQUAL;   // !=
+terminal Token  NEW;      // new
+terminal Token  NULL;     // null
+terminal Token  PLUS;     // +
+terminal Token  RB;       // ]
+terminal Token  RCBR;     // }
+terminal Token  RETURN;   // return
+terminal Token  RP;       // )
+terminal Token  SEMI;     // ;
+terminal Token  STATIC;   // static
+terminal Token  STRING;   // string
+terminal Token  QUOTE;    // "Hello"
+terminal Token  THIS;     // this
+terminal Token  TRUE;     // true
+terminal Token  VOID;     // void
+terminal Token  WHILE;    // while
+
+terminal        UMINUS;   // - (for the cases of -6, etc.)
+
+nonterminal Program            PROGRAM;
+nonterminal Method             METHOD;
+nonterminal StaticMethod       STATIC_METHOD;
+nonterminal VirtualMethod      VIRTUAL_METHOD;
+nonterminal ICClass            CLASS_DEC;
+nonterminal ClassBody          FIELDS_AND_METHODS;
+nonterminal List<Field>        FIELDS;
+nonterminal List<Field>        FIELD_PART;
+nonterminal List<Formal>       FORMALS;
+nonterminal List<Formal>       FORMALS_LIST;
+nonterminal Type               TYPE;
+nonterminal Statement          STATEMENT;
+nonterminal StatementsBlock    STATEMENTS_BLOCK;
+nonterminal List<Statement>    STATEMENTS;
+nonterminal Expression         EXPRESSION;
+nonterminal List<Expression>   EXPRESSIONS;
+nonterminal List<Expression>   EXPRESSIONS_PART;
+nonterminal Call               CALL;
+nonterminal StaticCall         STATIC_CALL;
+nonterminal VirtualCall        VIRTUAL_CALL;
+nonterminal Location           LOCATION;
+nonterminal IC.BinaryOps       BINOP;
+nonterminal IC.UnaryOps        UNOP;
+nonterminal Literal            LITERAL;
+
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+/// Precedence declarations                        ///
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+
+// Copied directly from the specs - so it should be right by definition :D
+precedence right IF;
+precedence left ELSE;
+precedence right ASSIGN;
+precedence left LOR;
+precedence left LAND;
+precedence left NEQUAL, EQUAL;
+precedence nonassoc GT, GTE, LT, LTE;
+precedence left PLUS, MINUS;
+precedence left DIVIDE, MULTIPLY, MOD;
+precedence right UMINUS, LNEG;
+precedence left RB, LB, RP, LP, DOT;
+
+
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+/// The Grammar                                    ///
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////
+/// Program                                        ///
+//////////////////////////////////////////////////////
+
+// A program is made out of several classes.
+PROGRAM          ::= CLASS_DEC:cd1
+                     {: LinkedList<ICClass> TEMP_LIST = new LinkedList<ICClass>();
+                        TEMP_LIST.add(cd1); RESULT = new Program(TEMP_LIST); :}
+                     |
+                     PROGRAM:p CLASS_DEC:cd1
+                     {:
+                        p.getClasses().add(cd1);
+                        RESULT = p;
+                     :}
+                      ;
+
+//////////////////////////////////////////////////////
+/// Class Declarations                             ///
+//////////////////////////////////////////////////////
+
+// Class declarations
+// When declaring a class, it may or may not have a super class
+// It also may or may not have a body (classes without a body are stupid, but they
+// are not errors according to IC
+CLASS_DEC          ::= CLASS CLASS_ID:c1 LCBR FIELDS_AND_METHODS:fm RCBR
+                     {: RESULT = new ICClass (c1.getLine(), c1.getValue(), fm.getFields(), fm.getMethods()); :}
+                     |
+                     // class        B         extends        A           {  (FIELD|METHOD)*  }
+                     CLASS CLASS_ID:c1 EXTENDS CLASS_ID:c2 LCBR FIELDS_AND_METHODS:fm RCBR
+                     {: RESULT = new ICClass(c1.getLine(), c1.getValue(), c2.getValue(), fm.getFields(), fm.getMethods()); :}
+                     |
+                     // Now treat the silly case of empty classes...
+                     CLASS CLASS_ID:c1 LCBR RCBR
+                     {: RESULT = new ICClass (c1.getLine(), c1.getValue(), new LinkedList<Field>(), new LinkedList<Method>()); :}
+                     |
+                     CLASS CLASS_ID:c1 EXTENDS CLASS_ID:c2 LCBR RCBR
+                     {: RESULT = new ICClass (c1.getLine(), c1.getValue(), c2.getValue(), new LinkedList<Field>(), new LinkedList<Method>()); :}
+                     ;
+
+//////////////////////////////////////////////////////
+/// Field Declarations                             ///
+//////////////////////////////////////////////////////
+
+// The body of class is a list of fields and methods
+// We need a new object ClassBody for this, which has add(Field f), add (Method m)
+// In addition it should have List<Method> getMethods(), List<Field> getFields()
+// several fields may be declare in the same line, so we have FIELDS (a list) instead of FIELD
+FIELDS_AND_METHODS ::= FIELDS:f
+                     {: RESULT = new ClassBody(); RESULT.add (f); :}
+                     |
+                     METHOD:m
+                     {: RESULT = new ClassBody(); RESULT.add (m); :}
+                     |
+                     FIELDS_AND_METHODS:fm FIELDS:f
+                     {: RESULT = fm; fm.add (f); :}
+                     |
+                     FIELDS_AND_METHODS:fm METHOD:m
+                     {: RESULT = fm; fm.add (m); :}
+                     ;
+// Note that IC does not allow to initialize fields inside the line of their declaration
+FIELD_PART         ::= TYPE:t ID:id
+                     {: RESULT = new LinkedList<Field>(); RESULT.add (new Field(t, id.getValue())); :}
+                     |
+                     FIELD_PART:fp COMMA ID:id
+                     {: RESULT = fp; RESULT.add (new Field (fp.get(0).getType(), id.getValue())); :}
+                     ;
+FIELDS             ::= FIELD_PART:fp SEMI
+                     {: RESULT = fp; :}
+                     ;
+//////////////////////////////////////////////////////
+/// Function Declarations                          ///
+//////////////////////////////////////////////////////
+METHOD            ::= STATIC_METHOD:m
+                     {: RESULT = m; :}
+                     |
+                     VIRTUAL_METHOD:m
+                     {: RESULT = m; :}
+                     ;
+// A static method - can have zero or more parameters
+STATIC_METHOD     ::= STATIC TYPE:t ID:id FORMALS_LIST:f STATEMENTS_BLOCK:body
+                     {: RESULT = new StaticMethod (t, id.getValue(), f, body.getStatements()); :}
+                     | STATIC VOID:v ID:id FORMALS_LIST:f STATEMENTS_BLOCK:body
+                     {: RESULT = new StaticMethod (new PrimitiveType(v.getLine(), IC.DataTypes.VOID), id.getValue(), f, body.getStatements()); :}
+                     ;
+
+// A virtual method - can have zero or more parameters
+// Looks like a very stupid duplication of StaticMethod...
+// But, we can't do METHOD ::= ..., VIRTUAL_METHOD ::= METHOD, STATIC_METHOD ::= STATIC METHOD
+// That is because this form would be ambiguous... So we have to live with this form
+VIRTUAL_METHOD     ::= TYPE:t ID:id FORMALS_LIST:f STATEMENTS_BLOCK:body
+                     {: RESULT = new VirtualMethod (t, id.getValue(), f, body.getStatements()); :}
+                     | VOID:v ID:id FORMALS_LIST:f STATEMENTS_BLOCK:body
+                     {: RESULT = new VirtualMethod (new PrimitiveType(v.getLine(), IC.DataTypes.VOID), id.getValue(), f, body.getStatements()); :}
+                     ;
+
+// The parameters of a function
+FORMALS            ::= TYPE:t ID:id
+                     {: RESULT = new LinkedList<Formal>(); RESULT.add (new Formal (t, id.getValue())); :}
+                     |
+                     FORMALS:f COMMA TYPE:t ID:id
+                     {: RESULT = f; f.add (new Formal (t, id.getValue())); :}
+                     ;
+
+FORMALS_LIST       ::=  LP RP
+                     {: RESULT = new LinkedList<Formal>(); :}
+                     |
+                     LP FORMALS:f RP
+                     {: RESULT = f; :}
+                     ;
+
+//////////////////////////////////////////////////////
+/// Statements                                     ///
+//////////////////////////////////////////////////////
+
+// A block of zero or more sentences
+STATEMENTS_BLOCK   ::= LCBR:l RCBR
+                      {: RESULT = new StatementsBlock (l.getLine(), new LinkedList<Statement>()); :}
+                      | LCBR:l STATEMENTS:st RCBR
+                      {: RESULT = new StatementsBlock (l.getLine(), st); :}
+                      ;
+
+// Many statements
+STATEMENTS         ::= STATEMENT:s
+                      {: RESULT = new LinkedList<Statement>(); RESULT.add (s); :}
+                      | STATEMENTS:st STATEMENT:s
+                      {: RESULT = st; st.add (s); :}
+                      ;
+// Statement :
+STATEMENT          ::= LOCATION:l ASSIGN EXPRESSION:e SEMI // assignment
+                      {: RESULT = new Assignment(l, e); :}
+                      | CALL:c SEMI  // function call
+                      {: RESULT = new CallStatement(c); :}
+                      | RETURN:r SEMI  // void return statement
+                      {: RESULT = new Return(r.getLine()); :}
+                      | RETURN:r EXPRESSION:e SEMI // non-void return statement
+                      {: RESULT = new Return(r.getLine(), e); :}
+                      | IF LP EXPRESSION:e RP STATEMENT:s1 ELSE STATEMENT:s2 // if statement with else
+                      {: RESULT = new If(e, s1, s2); :} %prec ELSE
+                      | IF LP EXPRESSION:e RP STATEMENT:s // if statement
+                      {: RESULT = new If(e, s); :}  %prec IF
+                      | WHILE LP EXPRESSION:e RP STATEMENT:s // while statement
+                      {: RESULT = new While(e, s); :}
+                      | BREAK:b SEMI // break statement
+                      {: RESULT = new Break(b.getLine()); :}
+                      | CONTINUE:c SEMI // continue statement
+                      {: RESULT = new Continue(c.getLine()); :}
+                      | STATEMENTS_BLOCK:st // statement block
+                      {: RESULT = st; :}
+                      | TYPE:t ID:i SEMI // varaible definition
+                      {: RESULT = new LocalVariable(t, i.getValue()); :}
+                      | TYPE:t ID:i ASSIGN EXPRESSION:e SEMI //variable definition with assignment
+                      {: RESULT = new LocalVariable(t, i.getValue(), e); :}
+                      ;
+
+TYPE              ::= INT:n
+                     {: RESULT = new PrimitiveType(n.getLine(), IC.DataTypes.INT); :}
+                     | BOOLEAN:b
+                     {: RESULT = new PrimitiveType(b.getLine(), IC.DataTypes.BOOLEAN); :}
+                     | STRING:s
+                     {: RESULT = new PrimitiveType(s.getLine(), IC.DataTypes.STRING); :}
+                     | CLASS_ID:c
+                     {: RESULT = new UserType(c.getLine(), c.getValue()); :}
+                     | TYPE:type LB RB
+                     {: RESULT = type; type.incrementDimension(); :}
+                     ;
+
+
+//////////////////////////////////////////////////////
+/// Expressions                                    ///
+//////////////////////////////////////////////////////
+
+// expression
+EXPRESSION        ::= LOCATION:l // location
+                      {: RESULT = l; :}
+                      | CALL:c // function call (with value)
+                      {: RESULT = c; :}
+                      | THIS:t // this
+                      {: RESULT = new This(t.getLine()); :}
+                      | NEW CLASS_ID:c LP RP // creating a new object
+                      {: RESULT = new NewClass(c.getLine(), c.getValue()); :}
+                      // where should i take the line from?
+                      | NEW TYPE:t LB EXPRESSION:e RB // creating an array
+                      {: RESULT = new NewArray(t, e); :}
+                      | EXPRESSION:e DOT LENGTH // length expression
+                      {: RESULT = new Length(e); :}
+                      | EXPRESSION:e1 BINOP:b EXPRESSION:e2 // binary operator
+                      {: RESULT = OpFactory.make(e1, b, e2); :}
+                      | UNOP:u EXPRESSION:e                 // unary operator
+                      {: RESULT = OpFactory.make(u,e); :}  %prec UMINUS
+                      | LITERAL:l // literal expression
+                      {: RESULT = l; :}
+                      | LP EXPRESSION:e RP // expression in parenthesis
+                      {: RESULT = new ExpressionBlock(e); :}
+                      // is this what they mean by expression block?
+                      ;
+
+// some function call, either static or virtual
+CALL               ::= STATIC_CALL:s
+                     {: RESULT = s; :}
+                     | VIRTUAL_CALL:v
+                     {: RESULT = v; :}
+                     ;
+
+// (‘,’ expr)*
+EXPRESSIONS_PART    ::= COMMA EXPRESSION:e EXPRESSIONS_PART:ep
+                     {: RESULT = ep; ep.add (0, e); :}
+                     | COMMA EXPRESSION:e
+                     {: RESULT = new LinkedList<Expression>(); RESULT.add (e); :}
+                     ;
+
+// expr (‘,’ expr)*
+EXPRESSIONS        ::= EXPRESSION:e
+                     {: RESULT = new LinkedList<Expression>(); RESULT.add (e); :}
+                     | EXPRESSION:e EXPRESSIONS_PART:ep
+                     {: RESULT = ep; ep.add(0, e); :}
+                     ;
+
+STATIC_CALL       ::= CLASS_ID:c DOT ID:i LP EXPRESSIONS:args RP
+                     {: RESULT = new StaticCall(c.getLine(), c.getValue(), i.getValue(), args); :}
+                     | CLASS_ID:c DOT ID:i LP RP
+                     {: RESULT = new StaticCall(c.getLine(), c.getValue(), i.getValue(), new LinkedList<Expression>()); :}
+                     ;
+VIRTUAL_CALL      ::= EXPRESSION:e DOT ID:i LP EXPRESSIONS:args RP
+                     {: RESULT = new VirtualCall(i.getLine(), e, i.getValue(), args); :}
+                     | EXPRESSION:e DOT ID:i LP RP
+                     {: RESULT = new VirtualCall(i.getLine(), e, i.getValue(), new LinkedList<Expression>()); :}
+                     // Inside a class, we can call virtual methods without a prefix
+                     | ID:i LP EXPRESSIONS:args RP
+                     {: RESULT = new VirtualCall(i.getLine(), i.getValue(), args); :}
+                     | ID:i LP RP
+                     {: RESULT = new VirtualCall(i.getLine(), i.getValue(), new LinkedList<Expression>()); :}
+                     ;
+
+// Location - anything which is read from memory
+// This can be an identifier (from this class or another) or a place in an array
+LOCATION           ::= ID:i
+                     {: RESULT = new VariableLocation(i.getLine(),i.getValue()); :}
+                     | EXPRESSION:e DOT ID:i
+                     {: RESULT = new VariableLocation(i.getLine(),e, i.getValue()); :}
+                                       // once again, e's or i's getLine.
+                     | EXPRESSION:e1 LB EXPRESSION:e2 RB
+                     {: RESULT = new ArrayLocation(e1, e2); :}
+                     ;
+
+
+UNOP               ::= MINUS // The right predecense is defined above!
+                     {: RESULT = IC.UnaryOps.UMINUS; :}
+                     | LNEG
+                     {: RESULT = IC.UnaryOps.LNEG; :}
+                     ;
+
+BINOP              ::= PLUS
+                     {: RESULT = IC.BinaryOps.PLUS; :}
+                     | MINUS
+                     {: RESULT = IC.BinaryOps.MINUS; :}
+                     | MULTIPLY
+                     {: RESULT = IC.BinaryOps.MULTIPLY; :}
+                     | DIVIDE
+                     {: RESULT = IC.BinaryOps.DIVIDE; :}
+                     | MOD
+                     {: RESULT = IC.BinaryOps.MOD; :}
+                     | LAND
+                     {: RESULT = IC.BinaryOps.LAND; :}
+                     | LOR
+                     {: RESULT = IC.BinaryOps.LOR; :}
+                     | LT
+                     {: RESULT = IC.BinaryOps.LT; :}
+                     | LTE
+                     {: RESULT = IC.BinaryOps.LTE; :}
+                     | GT
+                     {: RESULT = IC.BinaryOps.GT; :}
+                     | GTE
+                     {: RESULT = IC.BinaryOps.GTE; :}
+                     | EQUAL
+                     {: RESULT = IC.BinaryOps.EQUAL; :}
+                     | NEQUAL
+                     {: RESULT = IC.BinaryOps.NEQUAL; :}
+                     ;
+
+
+
+
+// literal
+LITERAL            ::= INTEGER:n
+                     {: RESULT = new Literal(n.getLine(), IC.LiteralTypes.INTEGER, Integer.parseInt(n.getValue())); :}
+                     | QUOTE:s // Do not confuse - STRING is a keywords!
+                     {: RESULT = new Literal(s.getLine(), IC.LiteralTypes.STRING, s.getValue()); :}
+                     | TRUE:t
+                     {: RESULT = new Literal(t.getLine(), IC.LiteralTypes.TRUE, new Boolean(true)); :}
+                     | FALSE:f
+                     {: RESULT = new Literal(f.getLine(), IC.LiteralTypes.FALSE, new Boolean(false)); :}
+                     | NULL:n
+                     {: RESULT = new Literal(n.getLine(), IC.LiteralTypes.NULL, null); :}
+                     ;
