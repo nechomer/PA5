@@ -38,7 +38,7 @@ public class AsmTranslator {
 		result = result.replaceAll(".lir", ".ic");
 		result += "\"\n\n";
 		result += "# global declarations\n";
-		result += ".global __ic_main\n\n";
+		result += ".global _ic_main\n\n";
 		result += "# data section \n.data\n";
 		result += "\t.align 4\n\n";
 		sb.append(result);
@@ -64,6 +64,7 @@ public class AsmTranslator {
 				}
 				sb.append(result + "\n");
 			}
+			sb.append(".text\n");
 		} catch (IOException e) {
 
 		}
@@ -133,7 +134,12 @@ public class AsmTranslator {
 					String label = line.substring(0, line.length()-1);
 					if(!lablesMap.get(label)) {  // Its a method
 						CurrMethod = label;
+						emit(".align 4");
+						emit(CurrMethod + ":");
+						makePrologue(CurrMethod);
 					}
+					else
+						
 				}
 				
 				StringTokenizer tokenizer = new StringTokenizer(line); 	
@@ -374,7 +380,11 @@ public class AsmTranslator {
 					
 				}
 				else if(lirOp.equals("Library")){
-					
+					firstToken = tokenizer.nextToken();
+					if(firstToken.startsWith("__exit(0)")) {
+						makeEpilogueForFunc("_ic_main");
+					}
+							
 				}
 				else if(lirOp.equals("StaticCall")){
 					
@@ -448,7 +458,6 @@ public class AsmTranslator {
 
 		}
 
-		fw.write("# text (code) section\n\t.text\n\n");
 		fw.close();
 	}
 	
@@ -544,6 +553,22 @@ public class AsmTranslator {
     }
     private static String getFuncFromCall(String str){
     	return str.substring(0, str.indexOf("(")-1);
+    }
+    private void makeEpilogueForFunc(String currMethod) {
+    	
+        emit("# Epilogue");
+        emit(currMethod + "_epilogue:");
+        emit("mov %ebp, %esp");
+        emit("pop %ebp");
+        emit("ret");
+    }
+    private void makePrologue(String currMethod) {
+    	
+        emit("# Prologue");
+        emit("push %ebp");
+        emit("mov %esp, %ebp");
+        emit("sub $" + ml.getVarStackSize(currMethod) + ", %esp");
+    	
     }
 	
 }
