@@ -555,7 +555,7 @@ public class AsmTranslator {
     private static String getParamsFromCall(String str){
     	
     	if((str.indexOf("(") +1) != (str.indexOf(")")) )
-    		return str.substring(str.indexOf("(") + 1, str.indexOf(")") - 1);
+    		return str.substring(str.indexOf("(") + 1, str.indexOf(")"));
     	else
     		return "";
     }

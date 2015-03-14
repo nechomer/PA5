@@ -233,6 +233,7 @@ public class LirTranslator implements Visitor {
 			String reg = getNextReg() ;
 			String lir = "" + returnStatement.getValue().accept(this);
 			lir += "Return " + reg + "\n";
+			addRegsToMethod(returnStatement.scope);
 			return lir;
 		}
 		else { 
@@ -255,6 +256,7 @@ public class LirTranslator implements Visitor {
 	public Object visit(If ifStatement) {
 		String lir = "";
 		String condReg = getNextReg();
+		addRegsToMethod(ifStatement.scope);
 		String falseLabel = makeNextLirLabel("false_label");
 		String endLabel = makeNextLirLabel("end_label");
 		
@@ -293,7 +295,7 @@ public class LirTranslator implements Visitor {
 	public Object visit(While whileStatement) {
 		String lir = "";
 		String condReg = getNextReg();
-		
+		addRegsToMethod(whileStatement.scope);
 		String testLabel = makeNextLirLabel("test_label");
 		String endLabel = makeNextLirLabel("end_label");
 		String oldTestLabel = globalTestLabel;
@@ -365,6 +367,7 @@ public class LirTranslator implements Visitor {
 			String reg = getNextReg();
 			lir += localVariable.getInitValue().accept(this);
 			lir += "Move " + reg + ", " + localVariable.getName() + "_" + methodNameAndScope[1] + "\n";
+			addRegsToMethod(localVariable.scope);
 		} else {
 			lir += "Move 0, " + localVariable.getName() + "_" + methodNameAndScope[1] + "\n";
 		}
@@ -394,7 +397,7 @@ public class LirTranslator implements Visitor {
 					currReg++;
 				String objReg = getNextReg();
 				lir += "Move this, " + objReg + "\n";
-				
+				addRegsToMethod(location.scope);
 				// get field offset in the dispatch table
 				String className = location.scope.getClassOfScope();
 				int offset = DispatchTableBuilder.getFieldOffset(className, location.getName());
@@ -403,7 +406,6 @@ public class LirTranslator implements Visitor {
 					lir += "MoveField %s, " + objReg + "." + offset + "\n";
 				} else {//In case it is a direct access to the field, no assignment
 					lir += "MoveField " + objReg + "." + offset + ", " + resReg + "\n";
-					addRegsToMethod(location.scope);
 					currReg--;
 				}
 				
@@ -417,6 +419,7 @@ public class LirTranslator implements Visitor {
 				if ( ! location.isLhs() )
 					currReg++;
 				String objReg = getNextReg();
+				addRegsToMethod(location.scope);
 				lir += location.getLocation().accept(this);
 				lir += nullPtrCheckStr(objReg);
 				
@@ -428,7 +431,7 @@ public class LirTranslator implements Visitor {
 					lir += "MoveField %s, " + objReg + "." + offset + "\n";
 				} else {
 					lir += "MoveField " + objReg + "." + offset + ", " + resReg + "\n";
-					addRegsToMethod(location.scope);
+					
 					currReg--;
 				}
 				
@@ -460,11 +463,13 @@ public class LirTranslator implements Visitor {
 		if ( location.isLhs() ) {//The array location gets an assignment
 			
 			arrReg = getNextReg();
+			addRegsToMethod(location.scope);
 			lir += location.getArray().accept(this);
 			lir += nullPtrCheckStr(arrReg);
 
 			currReg++;
 			indexReg = getNextReg();
+			addRegsToMethod(location.scope);
 			lir += location.getIndex().accept(this);
 			lir += arrIdxOutOfBoundsCheckStr(arrReg, indexReg);
 			
@@ -478,18 +483,17 @@ public class LirTranslator implements Visitor {
 			
 			currReg++;
 			arrReg = getNextReg();
+			addRegsToMethod(location.scope);
 			lir += location.getArray().accept(this);
 			lir += nullPtrCheckStr(arrReg);
-			
 			currReg++;
 			indexReg = getNextReg();
 			lir += location.getIndex().accept(this);
 			lir += arrIdxOutOfBoundsCheckStr(arrReg, indexReg);
-			
+			addRegsToMethod(location.scope);
 			// Write result to target register
 			lir += "MoveArray " + arrReg + "[" + indexReg + "], " + resReg + "\n"; 
 			
-			addRegsToMethod(location.scope);
 			currReg -= 2;
 				
 		}
@@ -542,7 +546,8 @@ public class LirTranslator implements Visitor {
 		}
 
 		lir += "), " + resReg + "\n";
-			
+		
+		addRegsToMethod(call.scope);
 		currReg = startMax;
 		return lir;
 	}
@@ -864,6 +869,7 @@ public class LirTranslator implements Visitor {
 	@Override
 	public Object visit(Literal literal) {
 		String reg = getNextReg();
+		addRegsToMethod(literal.scope);
 		switch ( literal.getType() ) {
 		case INTEGER:
 			return "Move " + literal.getValue() + ", " + reg + "\n";
@@ -1033,7 +1039,7 @@ public class LirTranslator implements Visitor {
 	private void addRegsToMethod(FrameScope scope) {
 		String[] methodNameAndScope = scope.retrieveScopeName();
 		String methodName = getMethodLabel(methodNameAndScope[0]);
-		for (int i = 0; i< currReg; i++) {
+		for (int i = 0; i<= currReg; i++) {
 			methodLayouts.insertVar(methodName, "R" + i, "");
 		}
 	}
