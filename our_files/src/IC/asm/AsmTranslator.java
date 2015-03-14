@@ -127,8 +127,15 @@ public class AsmTranslator {
 		try {
 			while ((line = bufReader.readLine()) != null) {
 
-				if (line.startsWith("#")) continue;
+				
 				if (line.length() == 0) continue;
+				
+				if (line.startsWith("#")) {
+					emit(line);
+					if(line.equals("# End Of Method Block"))
+						makeEpilogueForFunc(CurrMethod);
+					continue;
+				}
 				
 				if (line.startsWith("_")) {
 					String label = line.substring(0, line.length()-1);
@@ -137,9 +144,10 @@ public class AsmTranslator {
 						emit(".align 4");
 						emit(CurrMethod + ":");
 						makePrologue(CurrMethod);
+					} else{
+
 					}
-					else
-						
+					continue;
 				}
 				
 				StringTokenizer tokenizer = new StringTokenizer(line); 	
@@ -439,19 +447,16 @@ public class AsmTranslator {
 					
 				}
 				else if(lirOp.equals("Return")){
-					
+
 					firstToken = tokenizer.nextToken();
-					
-					if(firstToken.equals("Rdummy")) {
-						
-						emit("jmp " + CurrMethod + "_epilogue");
-						
-					} else {
-			            firstOffset = ml.getOffset(CurrMethod, firstToken);
-			            emit("mov " + firstOffset + "(%ebp), %eax");
-			        }
-			        
-					
+
+					if(!firstToken.equals("Rdummy")) {
+						firstOffset = ml.getOffset(CurrMethod, firstToken);
+						emit("mov " + firstOffset + "(%ebp), %eax");
+
+					}
+					emit("jmp " + CurrMethod + "_epilogue");
+
 				}
 			}
 		} catch (IOException e) {
