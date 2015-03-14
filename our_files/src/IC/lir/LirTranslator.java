@@ -150,7 +150,7 @@ public class LirTranslator implements Visitor {
 			//attached at the end of the LIR code
 			if(method.getName().equals("main")){
 				label = "\n_ic_main:\n";
-				lir += "Library __exit(0),Rdummy\n";
+				lir += "Library __exit(0), Rdummy\n";
 			}
 			else {
 				lir += "Return Rdummy\n";
@@ -948,8 +948,8 @@ public class LirTranslator implements Visitor {
 	"	JumpLE _error2" +
 	"	Return Rdummy\n" +
 	"_error2:\n" +
-	"	Library __println(str_err_arr_out_of_bounds),Rdummy\n" +
-	"	Library __exit(1),Rdummy\n" + 
+	"	Library __println(str_err_arr_out_of_bounds), Rdummy\n" +
+	"	Library __exit(1), Rdummy\n" + 
 	"\n";
 
 	/**
@@ -966,8 +966,8 @@ public class LirTranslator implements Visitor {
 	"	JumpLE _error3\n" +
 	"	Return Rdummy\n" +
 	"_error3:\n" +
-	"	Library __println(str_err_neg_arr_size),Rdummy\n" +
-	"	Library __exit(1),Rdummy\n" + 
+	"	Library __println(str_err_neg_arr_size), Rdummy\n" +
+	"	Library __exit(1), Rdummy\n" + 
 	"\n";
 
 	/**
@@ -984,8 +984,8 @@ public class LirTranslator implements Visitor {
 	"	JumpTrue _error4\n" +
 	"	Return Rdummy\n" +
 	"_error4:\n" +
-	"	Library __println(str_err_div_by_zero),Rdummy\n" +
-	"	Library __exit(1),Rdummy\n" + 
+	"	Library __println(str_err_div_by_zero), Rdummy\n" +
+	"	Library __exit(1), Rdummy\n" + 
 	"\n";
 
 	/**
@@ -993,7 +993,7 @@ public class LirTranslator implements Visitor {
 	 * @return The LIR representation of null access checking
 	 */
 	private String nullPtrCheckStr(String reg) {
-		return "StaticCall __checkNullRef(a=" + reg + "),Rdummy\n";
+		return "StaticCall __checkNullRef(a=" + reg + "), Rdummy\n";
 	}
 
 	/**
@@ -1002,7 +1002,7 @@ public class LirTranslator implements Visitor {
 	 * @return The LIR representation of an array access - Checks it's a valid idx
 	 */
 	private String arrIdxOutOfBoundsCheckStr(String arrReg, String idxReg) {
-		return "StaticCall __checkArrayAccess(a=" + arrReg + ", i=" + idxReg + "),Rdummy\n";
+		return "StaticCall __checkArrayAccess(a=" + arrReg + ", i=" + idxReg + "), Rdummy\n";
 	}
 
 	/**
@@ -1010,7 +1010,7 @@ public class LirTranslator implements Visitor {
 	 * @return The LIR representation of a new array size - Checks it's a valid size (non negative)
 	 */
 	private String arrIdxCheckStr(String sizeReg) {
-		return "StaticCall __checkSize(n=" + sizeReg + "),Rdummy\n";
+		return "StaticCall __checkSize(n=" + sizeReg + "), Rdummy\n";
 	}
 
 	/**
@@ -1018,7 +1018,7 @@ public class LirTranslator implements Visitor {
 	 * @return The string LIR representation for a zero check of a Reg
 	 */
 	private String zeroDivCheckStr(String intReg) {
-		return "StaticCall __checkZero(b=" + intReg + "),Rdummy\n";
+		return "StaticCall __checkZero(b=" + intReg + "), Rdummy\n";
 	}
 	
 	/**
