@@ -5,21 +5,29 @@ import java.util.List;
 import java.util.Map;
 
 import IC.AST.Formal;
-import IC.SemanticChecks.FrameScope;
 
 public class MethodLayouts {
 	
-    private Map<String, MethodLayout> methodLayouts;
+    public MethodLayouts() {
+		methodLayouts = new HashMap<String, MethodLayout>();
+	}
+
+	private Map<String, MethodLayout> methodLayouts;
     
-    public void insertParameters(String methodName, List<Formal> fl) {
+    public void insertParameters(String methodName, List<Formal> paramteres) {
     	MethodLayout methodLayout = new MethodLayout();
-    	methodLayout.insertParameters(fl);
+    	methodLayout.insertParameters(paramteres);
     	methodLayouts.put(methodName, methodLayout);
     }
     
     public void insertVar(String methodName, String varName, String scopeName) {
 		MethodLayout methodLayout = methodLayouts.get(methodName);
 		methodLayout.insertVar(varName + ((scopeName == null) ? "" : "_" + scopeName));
+    }
+    
+    public int getOffset(String methodName, String regName) {
+    	MethodLayout methodLayout = methodLayouts.get(methodName);
+    	return (methodLayout.offsets.get(regName));
     }
    
 	private class MethodLayout {
