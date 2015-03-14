@@ -110,7 +110,7 @@ public class LirTranslator implements Visitor {
 		methodLayouts.insertParameters(getMethodLabel(method.getName()), method.getFormals());
         for (Statement statement : method.getStatements())
             lir += statement.accept(this); 
-        return lir;
+        return lir + "# End Of Method Block\n";
 	}
 	
 	/**
