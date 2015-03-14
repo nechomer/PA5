@@ -100,11 +100,9 @@ public class AsmTranslator {
 	
 	public void translateLirToAsm() throws IOException {
 		
-		String asmFileName = lirFileName.replaceAll(".lir$", ".s");
 		BufferedReader bufReader = new BufferedReader(new StringReader(lirStr));
 		String line = null;
 		String CurrMethod = null;
-		BufferedWriter fw = new BufferedWriter(new FileWriter(asmFileName));
 		
 		makeFileProlog();
 		makeConstantStrings();
@@ -122,9 +120,6 @@ public class AsmTranslator {
         int destOffset = 0;
         
         
-        
-		
-		try {
 			while ((line = bufReader.readLine()) != null) {
 
 				
@@ -458,13 +453,21 @@ public class AsmTranslator {
 
 				}
 			}
-		} catch (IOException e) {
+			
+			String asmFileName = lirFileName.replaceAll(".lir$", ".s");
+			
+			BufferedWriter fw = null;
+			try {
+				fw = new BufferedWriter(new FileWriter(asmFileName));
+			} catch (IOException e) {
+			}
+			finally {
+				if(fw!=null)
+					fw.close();
+			}
 
-		}
-
-		fw.close();
 	}
-	
+
     private void pushVars(String fromFunction, String toFunction, Map<String,String> paramsToRegs) {
        
     	List<String> params = ml.getParamsReverseList(toFunction);

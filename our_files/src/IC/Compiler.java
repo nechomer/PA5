@@ -3,7 +3,7 @@ package IC;
 import IC.AST.*;
 import IC.Parser.*;
 import IC.SemanticChecks.*;
-//import IC.asm.AsmTranslator;
+import IC.asm.AsmTranslator;
 import IC.asm.MethodLayouts;
 import IC.lir.DispatchTableBuilder;
 import IC.lir.LirTranslator;
@@ -129,8 +129,8 @@ public class Compiler {
 				fw.close();
      		}
      		
-//     		AsmTranslator asmTranslator = new AsmTranslator(args[0], dispatchVectorStr, lirCodeStr);
-//			asmTranslator.translateLirToAsm();
+     		AsmTranslator asmTranslator = new AsmTranslator(args[0], dispatchVectorStr, lirCodeStr, methodLayouts);
+			asmTranslator.translateLirToAsm();
      	
     	} catch (ParserException | SemanticException | LexicalError e) {
     		System.out.println(e.getMessage());
