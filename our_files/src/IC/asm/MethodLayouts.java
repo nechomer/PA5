@@ -85,7 +85,7 @@ public class MethodLayouts {
 	    
 	    public void insertParameters(List<Formal> parameters) {
 	    	for (Formal param : parameters) {
-	    		paramsReverseList.add(paramsReverseList.size()-1, param.getName());
+	    		paramsReverseList.add(0, param.getName());
 	    		offsets.put(param.getName(), lastParameterOffset);
 	    		lastParameterOffset += 4;
 	    	}
