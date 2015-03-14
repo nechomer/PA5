@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import IC.Parser.sym;
 import IC.lir.DispatchTableBuilder;
 import IC.lir.StringsBuilder;
 
@@ -79,7 +80,7 @@ public class AsmTranslator {
 			while ((line = bufReader.readLine()) != null) {
 				
 				if (line.startsWith("_")) {
-					lablesMap.put(line.substring(0, line.length()-2), false);
+					lablesMap.put(line.substring(0, line.length()-1), false);
 				}
 				
 				if (line.startsWith("jump")) {
@@ -107,6 +108,7 @@ public class AsmTranslator {
 		makeFileProlog();
 		makeConstantStrings();
 		makeDV();
+        makeLableMap();
 		
         String firstToken = null;
         String secondToken = null;
@@ -119,9 +121,7 @@ public class AsmTranslator {
         int indexOffset = 0;
         int destOffset = 0;
         
-        
 			while ((line = bufReader.readLine()) != null) {
-
 				
 				if (line.length() == 0) continue;
 				
@@ -134,6 +134,7 @@ public class AsmTranslator {
 				
 				if (line.startsWith("_")) {
 					String label = line.substring(0, line.length()-1);
+					System.out.println(label);
 					if(!lablesMap.get(label)) {  // Its a method
 						CurrMethod = label;
 						emit(".align 4");
@@ -559,7 +560,7 @@ public class AsmTranslator {
     		return "";
     }
     private static String getFuncFromCall(String str){
-    	return str.substring(0, str.indexOf("(")-1);
+    	return str.substring(0, str.indexOf("("));
     }
     private void makeEpilogueForFunc(String currMethod) {
     	

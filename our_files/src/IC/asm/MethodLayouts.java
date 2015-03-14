@@ -24,7 +24,7 @@ public class MethodLayouts {
     
     public void insertVar(String methodName, String varName, String scopeName) {
 		MethodLayout methodLayout = methodLayouts.get(methodName);
-		methodLayout.insertVar(varName + ((scopeName == null) ? "" : "_" + scopeName));
+		methodLayout.insertVar(varName + ((scopeName.equals("")) ? "" : "_" + scopeName));
     }
     
     public int getOffset(String methodName, String regName) {
@@ -45,20 +45,27 @@ public class MethodLayouts {
     private void makeErrorChecksLayouts() {
     	String[] regArray = {"R0"};
     	String[] paramArrayCheckNullRef = {"a"};
-    	String[] paramArrayCheckArrayAccess = {"a, i"};
+    	String[] paramArrayCheckArrayAccess = {"a", "i"};
     	String[] paramArrayCheckSize = {"n"};
     	String[] paramArrayCheckZero = {"b"};
     	insertErrorCheckLayout("__checkNullRef", regArray, paramArrayCheckNullRef);
     	insertErrorCheckLayout("__checkArrayAccess", regArray, paramArrayCheckArrayAccess);
     	insertErrorCheckLayout("__checkSize", regArray, paramArrayCheckSize);
     	insertErrorCheckLayout("__checkZero", regArray, paramArrayCheckZero);
+    	insertErrorCheckLayout("_error1", null, null);
+    	insertErrorCheckLayout("_error2", null, null);
+    	insertErrorCheckLayout("_error3", null, null);
+    	insertErrorCheckLayout("_error4", null, null);
     }
     
     private void insertErrorCheckLayout(String methodName, String[] regs, String[] parameters) {
     	MethodLayout methodLayout = new MethodLayout();
-    	methodLayout.insertParameters(parameters);
-    	for (String reg : regs) {
-    		methodLayout.insertVar(reg);
+    	if (parameters != null)
+    		methodLayout.insertParameters(parameters);
+    	if (regs != null) {
+	    	for (String reg : regs) {
+	    		methodLayout.insertVar(reg);
+	    	}
     	}
     	methodLayouts.put(methodName, methodLayout);
     }
@@ -93,6 +100,7 @@ public class MethodLayouts {
 	    
 	    public void insertParameters(String[] parameters) {
 	    	for (String param : parameters) {
+	    		paramsReverseList.add(0, param);
 	    		offsets.put(param, lastParameterOffset);
 	    		lastParameterOffset += 4;
 	    	}

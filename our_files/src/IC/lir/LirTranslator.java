@@ -118,7 +118,7 @@ public class LirTranslator implements Visitor {
 	 * @return - The method's label in LIR format
 	 */
 	private String getMethodLabel(String methodName) {
-		return "_" + currClass + "_" + methodName + ":\n"; 
+		return methodName.equals("main") ? "_ic_main" : "_" + currClass + "_" + methodName + ":\n"; 
 	}
 	
 	/**
@@ -358,17 +358,16 @@ public class LirTranslator implements Visitor {
 	@Override
 	public Object visit(LocalVariable localVariable) {
 		String lir = "";
-		if ( localVariable.hasInitValue() ) {
-			String reg = getNextReg();
-			lir += localVariable.getInitValue().accept(this);
-			lir += "Move " + reg + ", " + localVariable.getName() + "\n";
-		} else {
-			lir += "Move 0, " + localVariable.getName() + "\n";
-		}
 		String[] methodNameAndScope = localVariable.scope.retrieveScopeName();
 		String methodName = getMethodLabel(methodNameAndScope[0]);
 		methodLayouts.insertVar(methodName, localVariable.getName(), methodNameAndScope[1]);
-
+		if ( localVariable.hasInitValue() ) {
+			String reg = getNextReg();
+			lir += localVariable.getInitValue().accept(this);
+			lir += "Move " + reg + ", " + localVariable.getName() + "_" + methodNameAndScope[1] + "\n";
+		} else {
+			lir += "Move 0, " + localVariable.getName() + "_" + methodNameAndScope[1] + "\n";
+		}
 		return lir;
 	}
 	
@@ -435,13 +434,14 @@ public class LirTranslator implements Visitor {
 				
 				return lir;
 			} else {
+				String[] methodNameAndScope = location.scope.retrieveScopeName();
 				if ( location.isLhs() ) {
 					// variable is assignment target
-					lir = "Move %s, " + location.getName() + "\n";
+					lir = "Move %s, " + location.getName() + "_" + methodNameAndScope[1] + "\n";
 					return lir;
 				} else {
 					// variable is a part of an expression
-					lir = "Move " + location.getName() + ", " + getNextReg() + "\n";
+					lir = "Move " + location.getName() + "_" +methodNameAndScope[1] + ", " + getNextReg() + "\n";
 					return lir;
 				}
 			}
@@ -489,6 +489,7 @@ public class LirTranslator implements Visitor {
 			// Write result to target register
 			lir += "MoveArray " + arrReg + "[" + indexReg + "], " + resReg + "\n"; 
 			
+			addRegsToMethod(location.scope);
 			currReg -= 2;
 				
 		}

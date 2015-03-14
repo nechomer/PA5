@@ -129,7 +129,7 @@ public class Compiler {
 				fw.close();
      		}
      		
-     		AsmTranslator asmTranslator = new AsmTranslator(args[0], dispatchVectorStr, lirCodeStr, methodLayouts);
+     		AsmTranslator asmTranslator = new AsmTranslator(args[0], lirCodeStr, dispatchVectorStr, methodLayouts);
 			asmTranslator.translateLirToAsm();
      	
     	} catch (ParserException | SemanticException | LexicalError e) {
