@@ -3,8 +3,8 @@ package IC;
 import IC.AST.*;
 import IC.Parser.*;
 import IC.SemanticChecks.*;
+import IC.asm.AsmTranslator;
 import IC.asm.MethodLayouts;
-//import IC.asm.AsmTranslator;
 import IC.lir.DispatchTableBuilder;
 import IC.lir.LirTranslator;
 import IC.lir.StringsBuilder;
@@ -116,21 +116,21 @@ public class Compiler {
      		methodLayouts = new MethodLayouts();
      		LirTranslator lt = new LirTranslator(StringsBuilder.getStringsMap(), methodLayouts);
      		
+     		String lirStringsStr = StringsBuilder.exportStringLirTable();
+     		String dispatchVectorStr = DispatchTableBuilder.printDispatchTable();
+     		String lirCodeStr = programNode.accept(lt).toString();
      		
-     		String lir = 
-     				StringsBuilder.exportStringLirTable() + "\n" +
-     				DispatchTableBuilder.printDispatchTable()+ "\n" +
-     				programNode.accept(lt);
      		if(printLir) {
      			//print lir program
+     			String lir = lirStringsStr + "\n" + dispatchVectorStr + "\n" + lirCodeStr;
      			String lirFileName = args[0].replaceAll(".ic$", ".lir");
 				FileWriter fw = new FileWriter(lirFileName);
 				fw.write(lir);
 				fw.close();
-				//AsmTranslator asmTranslator = new AsmTranslator(lirFileName);
-				//asmTranslator.translateLirToAsm();
      		}
      		
+     		AsmTranslator asmTranslator = new AsmTranslator(args[0], dispatchVectorStr, lirCodeStr);
+			asmTranslator.translateLirToAsm();
      	
     	} catch (ParserException | SemanticException | LexicalError e) {
     		System.out.println(e.getMessage());

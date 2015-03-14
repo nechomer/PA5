@@ -1,5 +1,6 @@
 package IC.asm;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,13 @@ public class MethodLayouts {
     }
     
     public int getVarStackSize(String methodName) {
-    	MethodLayout methodLayout = methodLayouts.get(methodName);;
+    	MethodLayout methodLayout = methodLayouts.get(methodName);
     	return methodLayout.getVarStackSize();
+    }
+    
+    public List<String> getParamsReverseList(String methodName) {
+    	MethodLayout methodLayout = methodLayouts.get(methodName);
+    	return methodLayout.getParamsReverseList();
     }
     
     private void makeErrorChecksLayouts() {
@@ -62,6 +68,8 @@ public class MethodLayouts {
 
 	    private Map<String, Integer> offsets = new HashMap<String, Integer>();
 	    
+	    List<String> paramsReverseList = new ArrayList<String>();
+	    
 	    private int lastVarOffset = -4, lastParameterOffset = 8;
 	    
 	    public int getOffset(String regName) {
@@ -77,6 +85,7 @@ public class MethodLayouts {
 	    
 	    public void insertParameters(List<Formal> parameters) {
 	    	for (Formal param : parameters) {
+	    		paramsReverseList.add(paramsReverseList.size()-1, param.getName());
 	    		offsets.put(param.getName(), lastParameterOffset);
 	    		lastParameterOffset += 4;
 	    	}
@@ -91,6 +100,10 @@ public class MethodLayouts {
 
 	    public int getVarStackSize() {
 	    	return -lastVarOffset-4;
+	    }
+	    
+	    public List<String> getParamsReverseList() {
+	    	return paramsReverseList;
 	    }
 	    
 	}
