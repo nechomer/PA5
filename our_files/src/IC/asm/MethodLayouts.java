@@ -28,7 +28,12 @@ public class MethodLayouts {
     
     public int getOffset(String methodName, String regName) {
     	MethodLayout methodLayout = methodLayouts.get(methodName);
-    	return (methodLayout.offsets.get(regName));
+    	return methodLayout.getOffset(regName);
+    }
+    
+    public int getVarStackSize(String methodName) {
+    	MethodLayout methodLayout = methodLayouts.get(methodName);;
+    	return methodLayout.getVarStackSize();
     }
     
     private void makeErrorChecksLayouts() {
