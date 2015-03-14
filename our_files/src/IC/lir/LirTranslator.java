@@ -1,6 +1,7 @@
 package IC.lir;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +43,8 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
+import IC.SemanticChecks.FrameScope;
+import IC.asm.MethodLayout;
 
 public class LirTranslator implements Visitor {
 	
@@ -49,6 +52,7 @@ public class LirTranslator implements Visitor {
 	private String currClass;
 	private String globalTestLabel = null;
 	private String globalEndLabel = null;
+    private Map<String, MethodLayout> methodLayouts;
 	
 	private int currReg = 0;
 	private int currLabel = 0;
@@ -56,6 +60,7 @@ public class LirTranslator implements Visitor {
 	
 	public LirTranslator(Map<String,String> strMap) {
 		this.stringsMap = strMap;
+		methodLayouts = new HashMap<String, MethodLayout>();
 	}
 
 	/**
@@ -102,6 +107,9 @@ public class LirTranslator implements Visitor {
 	 */
 	private String visitMethod(Method method) {
 		String lir = "";
+		MethodLayout methodLayout = new MethodLayout();
+		methodLayout.insertParameters(method.getFormals());
+		methodLayouts.put(getMethodLabel(method.getName()), methodLayout);
         for (Statement statement : method.getStatements())
             lir += statement.accept(this); 
         return lir;
@@ -111,8 +119,8 @@ public class LirTranslator implements Visitor {
 	 * @param method - The visited method
 	 * @return - The method's label in LIR format
 	 */
-	private String getMethodLabel(Method method) {
-		return "_" + currClass + "_" + method.getName() + ":\n"; 
+	private String getMethodLabel(String methodName) {
+		return "_" + currClass + "_" + methodName + ":\n"; 
 	}
 	
 	/**
@@ -121,7 +129,7 @@ public class LirTranslator implements Visitor {
 	 */
 	@Override
 	public Object visit(VirtualMethod method) {
-		String label = "\n" + getMethodLabel(method);
+		String label = "\n" + getMethodLabel(method.getName());
 		String lir = visitMethod(method);
 		
 		if( method.getType().getName().equals("void"))
@@ -136,7 +144,7 @@ public class LirTranslator implements Visitor {
 	 */
 	@Override
 	public Object visit(StaticMethod method) {
-		String label = "\n" + getMethodLabel(method);
+		String label = "\n" + getMethodLabel(method.getName());
 		String lir = visitMethod(method);
 		
 		if( method.getType().getName().equals("void")) {
@@ -202,6 +210,7 @@ public class LirTranslator implements Visitor {
 		assignment.getVariable().setLhs(true);
 		String lirVar = "" + assignment.getVariable().accept(this);
 		lirAss += String.format(lirVar, reg);
+		addRegsToMethod(assignment.scope);
 		currReg--;
 		return lirAss;
 	}
@@ -358,9 +367,14 @@ public class LirTranslator implements Visitor {
 		} else {
 			lir += "Move 0, " + localVariable.getName() + "\n";
 		}
+		String[] methodNameAndScope = localVariable.scope.retrieveScopeName();
+		String methodName = getMethodLabel(methodNameAndScope[0]);
+		MethodLayout methodLayout = methodLayouts.get(methodName);
+		methodLayout.insertVar(localVariable.getName() + "_" + methodNameAndScope[1]);		
 		return lir;
 	}
-
+	
+	
 	/**
 	 * @param location - The visited variable location 
 	 * @return - The string representation of the LIR command for variable location
@@ -392,6 +406,7 @@ public class LirTranslator implements Visitor {
 					lir += "MoveField %s, " + objReg + "." + offset + "\n";
 				} else {//In case it is a direct access to the field, no assignment
 					lir += "MoveField " + objReg + "." + offset + ", " + resReg + "\n";
+					addRegsToMethod(location.scope);
 					currReg--;
 				}
 				
@@ -416,6 +431,7 @@ public class LirTranslator implements Visitor {
 					lir += "MoveField %s, " + objReg + "." + offset + "\n";
 				} else {
 					lir += "MoveField " + objReg + "." + offset + ", " + resReg + "\n";
+					addRegsToMethod(location.scope);
 					currReg--;
 				}
 				
@@ -456,7 +472,7 @@ public class LirTranslator implements Visitor {
 			
 			// create assignment translation
 			lir += "MoveArray %s, " + arrReg + "[" + indexReg + "]\n";
-			
+			addRegsToMethod(location.scope);
 			currReg--;
 		} else {
 
@@ -635,6 +651,7 @@ public class LirTranslator implements Visitor {
 		String sizeReg = getNextReg();
 		lir += newArray.getSize().accept(this);
 		lir += arrIdxCheckStr(sizeReg);
+		addRegsToMethod(newArray.scope);
 		currReg--;
 		
 		//new array of size (array size)*4
@@ -659,6 +676,7 @@ public class LirTranslator implements Visitor {
 		String arrReg = getNextReg();
 		lir += length.getArray().accept(this);
 		lir += nullPtrCheckStr(arrReg);
+		addRegsToMethod(length.scope);
 		currReg--;
 		
 		//array length
@@ -696,7 +714,7 @@ public class LirTranslator implements Visitor {
 		else {
 			binaryLir += binaryOp.getOperator().getLirOp()  + " " + secReg + ", " + firstReg  + "\n";
 		}
-		
+		addRegsToMethod(binaryOp.scope);
 		currReg--;
 		
 		return binaryLir;
@@ -846,17 +864,18 @@ public class LirTranslator implements Visitor {
 	 */
 	@Override
 	public Object visit(Literal literal) {
+		String reg = getNextReg();
 		switch ( literal.getType() ) {
 		case INTEGER:
-			return "Move " + literal.getValue() + ", " + getNextReg() + "\n";
+			return "Move " + literal.getValue() + ", " + reg + "\n";
 		case NULL:
-			return "Move 0, " + getNextReg() + "\n";
+			return "Move 0, " + reg + "\n";
 		case FALSE:
-			return "Move 0, " + getNextReg() + "\n";
+			return "Move 0, " + reg + "\n";
 		case TRUE:
-			return "Move 1, " + getNextReg() + "\n";
+			return "Move 1, " + reg + "\n";
 		case STRING:
-			return "Move " + stringsMap.get(StringsBuilder.formatString(literal.getValue().toString())) + ", " + getNextReg() + "\n";
+			return "Move " + stringsMap.get(StringsBuilder.formatString(literal.getValue().toString())) + ", " + reg + "\n";
 		}
 		return null;
 	}
@@ -1010,5 +1029,14 @@ public class LirTranslator implements Visitor {
 	 */
 	private String makeUniqueJumpLabel(String name) {
 		return "_" + name + "_" +(++currLabel);
+	}
+	
+	private void addRegsToMethod(FrameScope scope) {
+		String[] methodNameAndScope = scope.retrieveScopeName();
+		String methodName = getMethodLabel(methodNameAndScope[0]);
+		MethodLayout methodLayout = methodLayouts.get(methodName);
+		for (int i = 0; i< currReg; i++) {
+			methodLayout.insertVar("R" + i);
+		}
 	}
 }

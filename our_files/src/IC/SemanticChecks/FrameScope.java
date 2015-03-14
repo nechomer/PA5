@@ -215,6 +215,25 @@ public class FrameScope {
 
 		return ret;
 	}
+	
+	/**
+	* @param id
+	* @return the scope name of the id
+	*/
+	public String[] retrieveScopeName() {
+		FrameScope scope = this;
+		String[] methodNameAndScope = new String[2];
+		String scopeStr = "";
+		int numIter = -1;
+		while (scope != null && scope.getType() != ScopeType.Method) {
+			numIter++;
+			scope = scope.getParent();
+			scopeStr += "_" + scope.getName();
+		}
+		methodNameAndScope[0] = scope.getName();
+		methodNameAndScope[1] = (numIter > 0) ? scopeStr : "main";
+		return methodNameAndScope;
+	}
 
 	/**
 	 * retrieve the type of a formal named 'name' up the scope hierarchy to the closest method scope
