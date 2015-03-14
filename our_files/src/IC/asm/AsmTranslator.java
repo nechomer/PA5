@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -94,51 +95,7 @@ public class AsmTranslator {
 		
 	}
 	
-    private void emit(String str) {
-        sb.append(str).append("\n");
-    }
-    
-    private static boolean isDigit(String str) {
-    	
-    	return Character.isDigit(str.charAt(0));
-    }
-    
-    private static boolean isLoadArray(String str) {
-    	
-    	return (str.indexOf("[") != -1);
-    }
-    
-    private static boolean isLoadField(String str) {
-    	
-    	return (str.indexOf(".") != -1);
-    }
-    
-    private static boolean isDv(String str) {
-    	
-    	return (str.indexOf("_") != -1);
-    }
-    
-    private static boolean isMem(String str) {
-    	
-    	return (str.indexOf("this") != -1);
-    }
-    
-    private void getArrayRegs(String token, String[] regs){
-    	
-    	int endReg1 = token.indexOf("[");
-    	int endReg2 = token.indexOf("]");
-    	regs[0] = token.substring(0, endReg1-1);
-    	regs[1] = token.substring(endReg1+1, endReg2-1);
-    	
-    }
-    
-    private void getFieldRegs(String token, String[] regs){
-    	
-    	String[] tmp = token.split(".");
-    	regs[0] = tmp[0];
-    	regs[1] = tmp[1];
-    	
-    }
+
 	
 	public void translateLirToAsm() throws IOException {
 		
@@ -173,7 +130,10 @@ public class AsmTranslator {
 				if (line.length() == 0) continue;
 				
 				if (line.startsWith("_")) {
-					String label = line.substring(0, line.length()-2);
+					String label = line.substring(0, line.length()-1);
+					if(!lablesMap.get(label)) {  // Its a method
+						CurrMethod = label;
+					}
 				}
 				
 				StringTokenizer tokenizer = new StringTokenizer(line); 	
@@ -418,37 +378,69 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("StaticCall")){
 					
-			        pushVars(lsc);
-			        emit("call " + lsc.getMethodName());
-			        emit("movl %eax, " + targetOffset + "(%ebp)");
-			        emit("add $" + 4 * lsc.getRegisterNumbers().size() + ", %esp");
+					firstToken = tokenizer.nextToken();
+					secondToken = tokenizer.nextToken();
+					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
+					String funcName = getFuncFromCall(firstToken);
 					
+					if(paramMap != null)
+						pushVars(CurrMethod, funcName, paramMap);
+					
+					emit("call " + funcName);
+					if(!secondToken.equals("Rdummy")) {
+						
+						firstOffset = ml.getOffset(CurrMethod, secondToken);
+						emit("movl %eax, " + firstOffset + "(%ebp)");
+						
+					}
+					
+					if(paramMap != null)
+						emit("add $" + 4 * paramMap.size() + ", %esp");
 				}
 				else if(lirOp.equals("VirtualCall")){
 					
-			        int targetOffset = currentMethod.getVarOffset("R" + lvc.getTargetRegister());
-			        int objectOffset = currentMethod.getVarOffset("R" + lvc.getObjectRegister());
-			        pushVars(lvc);
-			        emit("mov " + objectOffset + "(%ebp), %eax");
-			        // check for null pointer exception
-			        emit("cmp $0, %eax");
-			        emit("je " + Info.ErrorMessages.NullPointerReferece.getFunctionLabel());
-
+					firstToken = tokenizer.nextToken();
+					secondToken = tokenizer.nextToken();
+					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
+					String funcName = getFuncFromCall(firstToken);
+					String[] regs = new String[2];
+					
+					if(paramMap != null)
+						pushVars(CurrMethod, funcName, paramMap);
+					
+					getFieldRegs(funcName,regs);
+					
+					objectOffset = ml.getOffset(CurrMethod, regs[0]);
+					emit("mov " + objectOffset + "(%ebp), %eax");
 			        emit("push %eax");
 			        emit("mov 0(%eax), %eax");
-			        emit("call *" + 4 * lvc.getMethodOffset() + "(%eax)");
 
-			        emit("movl %eax, " + targetOffset + "(%ebp)");
-			        emit("add $" + 4 * (lvc.getRegisterNumbers().size() + 1) + ", %esp"); // +1 for this
+			        emit("call *" + 4 * Integer.parseInt(regs[1]) + "(%eax)");
+			        
+					if(!secondToken.equals("Rdummy")) {
+						
+						firstOffset = ml.getOffset(CurrMethod, secondToken);
+						emit("movl %eax, " + firstOffset + "(%ebp)");
+						
+					}
+					
+					if(paramMap != null)
+						emit("add $" + 4 * (paramMap.size() + 1) + ", %esp");
 					
 				}
 				else if(lirOp.equals("Return")){
 					
-			        if (lr.getParam() != -1) {
-			            int paramOffset = currentMethod.getVarOffset("R" + lr.getParam());
-			            emit("mov " + paramOffset + "(%ebp), %eax");
+					firstToken = tokenizer.nextToken();
+					
+					if(firstToken.equals("Rdummy")) {
+						
+						emit("jmp " + CurrMethod + "_epilogue");
+						
+					} else {
+			            firstOffset = ml.getOffset(CurrMethod, firstToken);
+			            emit("mov " + firstOffset + "(%ebp), %eax");
 			        }
-			        emit("jmp " + currentMethodLabelName + "_epilogue");
+			        
 					
 				}
 			}
@@ -460,13 +452,98 @@ public class AsmTranslator {
 		fw.close();
 	}
 	
-    private void pushVars(String currFunction, String[] params) {
-        List<Integer> regNumbers = lac.getRegisterNumbers();
-        for (int i = regNumbers.size() - 1; i >= 0; i--) {
-            int regOffset = currentMethod.getVarOffset("R" + regNumbers.get(i));
+    private void pushVars(String fromFunction, String toFunction, Map<String,String> paramsToRegs) {
+       
+    	List<String> params = ml.getParamsReverseList(toFunction);
+        int regOffset = 0;
+        for (String param:params ) {
+            regOffset = ml.getOffset(fromFunction, paramsToRegs.get(param));
             emit("mov " + regOffset + "(%ebp), %eax");
             emit("push %eax");
         }
+    }
+    
+    private static Map<String,String> makeParamsToRegs(String str){
+    	 	
+		StringTokenizer tokenizer = new StringTokenizer(str); 	
+		if(!tokenizer.hasMoreTokens())
+			return null;
+		
+		Map<String,String> ret = new HashMap<String,String>();
+		String paramToRegStr = null;
+		String[] paramToReg;
+		
+		while(tokenizer.hasMoreTokens()) {
+			paramToRegStr = formatStr(tokenizer.nextToken());
+			paramToReg = paramToRegStr.split("=");
+			ret.put(paramToReg[0], paramToReg[1]);
+		}
+		
+		return ret;
+    	
+    }
+    
+    private void emit(String str) {
+        sb.append(str).append("\n");
+    }
+    
+    private static boolean isDigit(String str) {
+    	
+    	return Character.isDigit(str.charAt(0));
+    }
+    
+    private static boolean isLoadArray(String str) {
+    	
+    	return (str.indexOf("[") != -1);
+    }
+    
+    private static boolean isLoadField(String str) {
+    	
+    	return (str.indexOf(".") != -1);
+    }
+    
+    private static boolean isDv(String str) {
+    	
+    	return (str.indexOf("_") != -1);
+    }
+    
+    private static boolean isMem(String str) {
+    	
+    	return (str.indexOf("this") != -1);
+    }
+    
+    private void getArrayRegs(String token, String[] regs){
+    	
+    	int endReg1 = token.indexOf("[");
+    	int endReg2 = token.indexOf("]");
+    	regs[0] = token.substring(0, endReg1-1);
+    	regs[1] = token.substring(endReg1+1, endReg2-1);
+    	
+    }
+    
+    private void getFieldRegs(String token, String[] regs){
+    	
+    	String[] tmp = token.split(".");
+    	regs[0] = tmp[0];
+    	regs[1] = tmp[1];
+    	
+    }
+    private static String formatStr(String str) {
+    	
+    	if(str.endsWith(","))
+    		return str.substring(0, str.length()-1);
+    	else
+    		return str;
+    }
+    private static String getParamsFromCall(String str){
+    	
+    	if((str.indexOf("(") +1) != (str.indexOf(")")) )
+    		return str.substring(str.indexOf("(") + 1, str.indexOf(")") - 1);
+    	else
+    		return "";
+    }
+    private static String getFuncFromCall(String str){
+    	return str.substring(0, str.indexOf("(")-1);
     }
 	
 }
