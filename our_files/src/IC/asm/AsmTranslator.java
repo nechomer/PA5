@@ -154,7 +154,7 @@ public class AsmTranslator {
 				String lirOp = tokenizer.nextToken();
 				if(lirOp.equals("Move")){
 					
-					firstToken = tokenizer.nextToken();
+					firstToken = formatStr(tokenizer.nextToken());
 					secondOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
 					
 					if (!isMem(firstToken)) {
@@ -172,7 +172,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("MoveArray")){
 					
-					firstToken = tokenizer.nextToken();
+					firstToken = formatStr(tokenizer.nextToken());
 					secondToken = tokenizer.nextToken();
 					String[] regs= new String[2];
 					boolean isLoad = isLoadArray(firstToken);
@@ -200,7 +200,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("MoveField")){
 					
-					firstToken = tokenizer.nextToken();
+					firstToken = formatStr(tokenizer.nextToken());
 					secondToken = tokenizer.nextToken();
 					String[] regs= new String[2];
 					boolean isLoad = isLoadField(firstToken);
@@ -234,7 +234,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("ArrayLength")){
 					
-					arrayOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					arrayOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					destOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
 			        emit("mov " + arrayOffset + "(%ebp), %ebx");
 			        emit("mov -4(%ebx), %ebx");
@@ -244,7 +244,7 @@ public class AsmTranslator {
 				// Arithmetic Instruction
 				else if(lirOp.equals("Add")){
 					
-					firstOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 		            emit("mov " + firstOffset + "(%ebp), %eax");
 		            emit("add " + secondOffset + "(%ebp), %eax");
@@ -253,7 +253,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("Sub")){
 				
-					firstOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 		            emit("mov " + secondOffset + "(%ebp), %eax");
 		            emit("sub " + firstOffset + "(%ebp), %eax");
@@ -262,7 +262,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("Mul")){
 					
-					firstOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 		            emit("mov " + secondOffset + "(%ebp), %eax");
 		            emit("imul " + firstOffset + "(%ebp), %eax");
@@ -271,7 +271,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("Div")){
 					
-					firstOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 		            emit("mov $0, %edx");
 		            emit("mov " + secondOffset + "(%ebp), %eax");
@@ -280,7 +280,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("Mod")){
 					
-					firstOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 		            emit("mov $0, %edx");
 		            emit("mov " + secondOffset + "(%ebp), %eax");
@@ -305,7 +305,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("And")){
 					
-					firstOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 			        emit("mov " + firstOffset + "(%ebp), %eax");
 			        emit("and " + secondOffset + "(%ebp), %eax");
@@ -314,7 +314,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("Or")){
 					
-					firstOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 			        emit("mov " + firstOffset + "(%ebp), %eax");
 			        emit("or " + secondOffset + "(%ebp), %eax");
@@ -325,7 +325,7 @@ public class AsmTranslator {
 				else if(lirOp.equals("Xor")){
 					
 					firstToken = tokenizer.nextToken();
-					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
+					secondOffset = ml.getOffset(CurrMethod,formatStr(tokenizer.nextToken()));
 			        emit("mov " + "$"+ firstToken + ", %eax");
 			        emit("xor " + secondOffset + "(%ebp), %eax");
 			        emit("movl %eax, " + secondOffset + "(%ebp)");
@@ -334,7 +334,7 @@ public class AsmTranslator {
 
 				else if(lirOp.equals("Compare")){
 					
-					firstToken = tokenizer.nextToken();
+					firstToken = formatStr(tokenizer.nextToken());
 		        	secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
 			        emit("mov " + secondOffset + "(%ebp), %eax");
 			        if (isDigit(firstToken)) {
@@ -390,7 +390,6 @@ public class AsmTranslator {
 				else if(lirOp.equals("Library")){
 					firstToken = tokenizer.nextToken();
 					if(firstToken.startsWith("__exit(0)")) {
-						makeEpilogueForFunc("_ic_main");
 					}
 							
 				}
