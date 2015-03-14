@@ -44,7 +44,7 @@ import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
 import IC.SemanticChecks.FrameScope;
-import IC.asm.MethodLayout;
+import IC.asm.MethodLayouts;
 
 public class LirTranslator implements Visitor {
 	
@@ -52,15 +52,15 @@ public class LirTranslator implements Visitor {
 	private String currClass;
 	private String globalTestLabel = null;
 	private String globalEndLabel = null;
-    private Map<String, MethodLayout> methodLayouts;
 	
 	private int currReg = 0;
 	private int currLabel = 0;
 	
+	private MethodLayouts methodLayouts;
 	
 	public LirTranslator(Map<String,String> strMap) {
 		this.stringsMap = strMap;
-		methodLayouts = new HashMap<String, MethodLayout>();
+		methodLayouts = new MethodLayouts();
 	}
 
 	/**
@@ -107,9 +107,7 @@ public class LirTranslator implements Visitor {
 	 */
 	private String visitMethod(Method method) {
 		String lir = "";
-		MethodLayout methodLayout = new MethodLayout();
-		methodLayout.insertParameters(method.getFormals());
-		methodLayouts.put(getMethodLabel(method.getName()), methodLayout);
+		methodLayouts.insertParameters(getMethodLabel(method.getName()), method.getFormals());
         for (Statement statement : method.getStatements())
             lir += statement.accept(this); 
         return lir;
@@ -369,8 +367,8 @@ public class LirTranslator implements Visitor {
 		}
 		String[] methodNameAndScope = localVariable.scope.retrieveScopeName();
 		String methodName = getMethodLabel(methodNameAndScope[0]);
-		MethodLayout methodLayout = methodLayouts.get(methodName);
-		methodLayout.insertVar(localVariable.getName() + "_" + methodNameAndScope[1]);		
+		methodLayouts.insertVar(methodName, localVariable.getName(), methodNameAndScope[1]);
+
 		return lir;
 	}
 	
@@ -1034,9 +1032,8 @@ public class LirTranslator implements Visitor {
 	private void addRegsToMethod(FrameScope scope) {
 		String[] methodNameAndScope = scope.retrieveScopeName();
 		String methodName = getMethodLabel(methodNameAndScope[0]);
-		MethodLayout methodLayout = methodLayouts.get(methodName);
 		for (int i = 0; i< currReg; i++) {
-			methodLayout.insertVar("R" + i);
+			methodLayouts.insertVar(methodName, "R" + i, "");
 		}
 	}
 }
