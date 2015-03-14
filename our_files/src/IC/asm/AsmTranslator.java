@@ -2,6 +2,7 @@ package IC.asm;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
@@ -17,14 +18,12 @@ public class AsmTranslator {
 	private String lirFileName;
 	private String lirStr;
 	private StringBuilder sb; 
-	private StringsBuilder ssb;
 	private String dts;
 	private Map<String,Boolean> lablesMap; // Contains labels, if method label than value = false
 	
-	public AsmTranslator(String lirFileName, String lirStr, StringsBuilder ssb, String dispatchTableString) {
+	public AsmTranslator(String lirFileName, String lirStr, String dispatchTableString) {
 		this.lirFileName = lirFileName;
 		this.lirStr = lirStr;
-		this.ssb = ssb;
 		this.dts = dispatchTableString;
 		this.lablesMap = new HashMap<String,Boolean>();
 		this.sb = new StringBuilder();
@@ -44,7 +43,7 @@ public class AsmTranslator {
 	
 	public void makeConstantStrings() {
 		
-		sb.append(this.ssb.exportStringLirTableForAsm());
+		sb.append(StringsBuilder.exportStringLirTableForAsm());
 	}
 	
 	public void makeDV() {
