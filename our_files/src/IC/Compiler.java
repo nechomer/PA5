@@ -3,6 +3,7 @@ package IC;
 import IC.AST.*;
 import IC.Parser.*;
 import IC.SemanticChecks.*;
+import IC.asm.MethodLayouts;
 //import IC.asm.AsmTranslator;
 import IC.lir.DispatchTableBuilder;
 import IC.lir.LirTranslator;
@@ -27,6 +28,7 @@ public class Compiler {
     	String LibraryFile;
     	String fullPath;
     	String progFileName, libFileName;
+    	MethodLayouts methodLayouts;
     	int index;
     	boolean printAst = false, dumpSymtab = false, printLir = false;
     	try {
@@ -111,7 +113,8 @@ public class Compiler {
      		programNode.accept(sb);
      		
      		//translate program to lir
-     		LirTranslator lt = new LirTranslator(StringsBuilder.getStringsMap());
+     		methodLayouts = new MethodLayouts();
+     		LirTranslator lt = new LirTranslator(StringsBuilder.getStringsMap(), methodLayouts);
      		
      		
      		String lir = 

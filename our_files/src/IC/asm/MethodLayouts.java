@@ -10,6 +10,7 @@ public class MethodLayouts {
 	
     public MethodLayouts() {
 		methodLayouts = new HashMap<String, MethodLayout>();
+		makeErrorChecksLayouts();
 	}
 
 	private Map<String, MethodLayout> methodLayouts;
@@ -29,6 +30,28 @@ public class MethodLayouts {
     	MethodLayout methodLayout = methodLayouts.get(methodName);
     	return (methodLayout.offsets.get(regName));
     }
+    
+    private void makeErrorChecksLayouts() {
+    	String[] regArray = {"R0"};
+    	String[] paramArrayCheckNullRef = {"a"};
+    	String[] paramArrayCheckArrayAccess = {"a, i"};
+    	String[] paramArrayCheckSize = {"n"};
+    	String[] paramArrayCheckZero = {"b"};
+    	insertErrorCheckLayout("__checkNullRef", regArray, paramArrayCheckNullRef);
+    	insertErrorCheckLayout("__checkArrayAccess", regArray, paramArrayCheckArrayAccess);
+    	insertErrorCheckLayout("__checkSize", regArray, paramArrayCheckSize);
+    	insertErrorCheckLayout("__checkZero", regArray, paramArrayCheckZero);
+    }
+    
+    private void insertErrorCheckLayout(String methodName, String[] regs, String[] parameters) {
+    	MethodLayout methodLayout = new MethodLayout();
+    	methodLayout.insertParameters(parameters);
+    	for (String reg : regs) {
+    		methodLayout.insertVar(reg);
+    	}
+    	methodLayouts.put(methodName, methodLayout);
+    }
+    
    
 	private class MethodLayout {
 
@@ -50,6 +73,13 @@ public class MethodLayouts {
 	    public void insertParameters(List<Formal> parameters) {
 	    	for (Formal param : parameters) {
 	    		offsets.put(param.getName(), lastParameterOffset);
+	    		lastParameterOffset += 4;
+	    	}
+	    }
+	    
+	    public void insertParameters(String[] parameters) {
+	    	for (String param : parameters) {
+	    		offsets.put(param, lastParameterOffset);
 	    		lastParameterOffset += 4;
 	    	}
 	    }

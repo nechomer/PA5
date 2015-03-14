@@ -58,9 +58,9 @@ public class LirTranslator implements Visitor {
 	
 	private MethodLayouts methodLayouts;
 	
-	public LirTranslator(Map<String,String> strMap) {
+	public LirTranslator(Map<String,String> strMap, MethodLayouts methodLayouts) {
 		this.stringsMap = strMap;
-		methodLayouts = new MethodLayouts();
+		this.methodLayouts = methodLayouts;
 	}
 
 	/**
