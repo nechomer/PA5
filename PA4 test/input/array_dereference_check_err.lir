@@ -32,8 +32,9 @@ __checkNullRef:
 	JumpTrue _error1
 	Return Rdummy
 _error1:
-	Library __println(str_err_null_ptr_ref),Rdummy
-	Library __exit(1),Rdummy
+	Move str_err_null_ptr_ref, R0
+	Library __println(R0), Rdummy
+	Library __exit(1), Rdummy
 
 # Check Array Index Out Of Bounds:
 # static void checkArrayAccess(array a, index i) {
@@ -47,9 +48,11 @@ __checkArrayAccess:
 	JumpL _error2
 	ArrayLength a, R0
 	Compare i, R0
-	JumpLE _error2	Return Rdummy
+	JumpLE _error2
+	Return Rdummy
 _error2:
-	Library __println(str_err_arr_out_of_bounds), Rdummy
+	Move str_err_arr_out_of_bounds, R0
+	Library __println(R0), Rdummy
 	Library __exit(1), Rdummy
 
 # Check Array Allocation Is Not With Negative Number:
@@ -62,7 +65,8 @@ __checkSize:
 	JumpLE _error3
 	Return Rdummy
 _error3:
-	Library __println(str_err_neg_arr_size), Rdummy
+	Move str_err_neg_arr_size, R0
+	Library __println(R0), Rdummy
 	Library __exit(1), Rdummy
 
 # Check Division By Zero:
@@ -71,10 +75,12 @@ _error3:
 # }
 __checkZero:
 	Move b, R0
-	Compare 0, R0	JumpTrue _error4
+	Compare 0, R0
+	JumpTrue _error4
 	Return Rdummy
 _error4:
-	Library __println(str_err_div_by_zero), Rdummy
+	Move str_err_div_by_zero, R0
+	Library __println(R0), Rdummy
 	Library __exit(1), Rdummy
 
 
