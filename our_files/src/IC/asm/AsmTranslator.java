@@ -384,12 +384,16 @@ public class AsmTranslator {
 					
 				}
 				else if(lirOp.equals("Library")){
+					
 					firstToken = tokenizer.nextToken();
 					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
 					String funcName = getFuncFromCall(firstToken);
+					
 					if(paramMap != null)
 						pushVars(CurrMethod, funcName, paramMap);
+					
 					emit("call " + funcName);
+					
 					if(!secondToken.equals("Rdummy")) {
 						
 						firstOffset = ml.getOffset(CurrMethod, secondToken);
@@ -399,8 +403,6 @@ public class AsmTranslator {
 					
 					if(paramMap != null)
 						emit("add $" + 4 * paramMap.size() + ", %esp");
-					if(firstToken.startsWith("__exit(0)")) {
-					}
 							
 				}
 				else if(lirOp.equals("StaticCall")){
