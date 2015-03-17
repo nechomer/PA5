@@ -110,7 +110,7 @@ public class LirTranslator implements Visitor {
 		methodLayouts.insertParameters(getMethodLabel(method.getName()), method.getFormals());
         for (Statement statement : method.getStatements())
             lir += statement.accept(this); 
-        return lir + "# End Of Method Block\n";
+        return lir;
 	}
 	
 	/**
@@ -133,7 +133,7 @@ public class LirTranslator implements Visitor {
 		if( method.getType().getName().equals("void"))
 				lir += "Return Rdummy\n";
 		
-		return label +lir;
+		return label +lir + "# End Of Method Block\n";
 	}
 	
 	/**
@@ -157,7 +157,7 @@ public class LirTranslator implements Visitor {
 			}
 		}
 		
-		return label +lir;
+		return label +lir + "# End Of Method Block\n";
 	}
 
 	/**

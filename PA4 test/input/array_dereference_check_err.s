@@ -38,7 +38,6 @@ _error1:
 # Prologue
 push %ebp
 mov %esp, %ebp
-sub $0, %esp
 push $str_err_null_ptr_ref
 call __println
 add $4, %esp
@@ -73,7 +72,6 @@ _error2:
 # Prologue
 push %ebp
 mov %esp, %ebp
-sub $0, %esp
 push $str_err_arr_out_of_bounds
 call __println
 add $4, %esp
@@ -100,7 +98,6 @@ _error3:
 # Prologue
 push %ebp
 mov %esp, %ebp
-sub $0, %esp
 push $str_err_neg_arr_size
 call __println
 add $4, %esp
@@ -126,7 +123,6 @@ _error4:
 # Prologue
 push %ebp
 mov %esp, %ebp
-sub $0, %esp
 push $str_err_div_by_zero
 call __println
 add $4, %esp
@@ -164,25 +160,24 @@ mov -12(%ebp), %eax
 push %eax
 mov 0(%eax), %eax
 call *0(%eax)
+push $0
+call __exit
+add $4, %esp
 # End Of Method Block
 # Epilogue
 _ic_main_epilogue:
 mov %ebp, %esp
 pop %ebp
 ret
-push $0
-call __exit
-add $4, %esp
 .align 4
 _C_foo:
 # Prologue
 push %ebp
 mov %esp, %ebp
-sub $0, %esp
+jmp _C_foo_epilogue
 # End Of Method Block
 # Epilogue
 _C_foo_epilogue:
 mov %ebp, %esp
 pop %ebp
 ret
-jmp _C_foo_epilogue

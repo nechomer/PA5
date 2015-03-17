@@ -606,7 +606,9 @@ public class AsmTranslator {
         emit("# Prologue");
         emit("push %ebp");
         emit("mov %esp, %ebp");
-        emit("sub $" + ml.getVarStackSize(currMethod) + ", %esp");
+        if ( ml.getVarStackSize(currMethod) > 0) {
+        	emit("sub $" + ml.getVarStackSize(currMethod) + ", %esp");
+        }
     	
     }
 	
