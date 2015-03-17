@@ -387,7 +387,7 @@ public class AsmTranslator {
 					
 					firstToken = tokenizer.nextToken();
 					String funcName = getFuncFromCall(firstToken);
-					
+					secondToken = tokenizer.nextToken();
 					String[] regs = getRegsFromLibCall(getParamsFromCall(firstToken));
 					int regOffset = 0;
 					

@@ -932,8 +932,8 @@ public class LirTranslator implements Visitor {
 	"	JumpTrue _error1\n" +
 	"	Return Rdummy\n" +
 	"_error1:\n" +
-	"	Library __println(str_err_null_ptr_ref),Rdummy\n" +
-	"	Library __exit(1),Rdummy\n" + 
+	"	Library __println(str_err_null_ptr_ref), Rdummy\n" +
+	"	Library __exit(1), Rdummy\n" + 
 	"\n";
 
 	/**

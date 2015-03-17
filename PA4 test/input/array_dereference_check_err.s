@@ -39,6 +39,12 @@ _error1:
 push %ebp
 mov %esp, %ebp
 sub $0, %esp
+push $str_err_null_ptr_ref
+call __println
+add $4, %esp
+push $1
+call __exit
+add $4, %esp
 # Check Array Index Out Of Bounds:
 # static void checkArrayAccess(array a, index i) {
 # 	if (i<0 || i>=a.length) {
@@ -61,12 +67,19 @@ movl %ebx, -4(%ebp)
 mov -4(%ebp), %eax
 cmp 12(%ebp), %eax
 jle _error2
+jmp __checkArrayAccess_epilogue
 .align 4
 _error2:
 # Prologue
 push %ebp
 mov %esp, %ebp
 sub $0, %esp
+push $str_err_arr_out_of_bounds
+call __println
+add $4, %esp
+push $1
+call __exit
+add $4, %esp
 # Check Array Allocation Is Not With Negative Number:
 # static void checkSize(size n) {
 # 	if (n<0) Library.println("Runtime Error");
@@ -88,6 +101,12 @@ _error3:
 push %ebp
 mov %esp, %ebp
 sub $0, %esp
+push $str_err_neg_arr_size
+call __println
+add $4, %esp
+push $1
+call __exit
+add $4, %esp
 # Check Division By Zero:
 # static void checkZero(value b) {
 # 	if (b == 0) Library.println("Runtime Error");
@@ -108,6 +127,12 @@ _error4:
 push %ebp
 mov %esp, %ebp
 sub $0, %esp
+push $str_err_div_by_zero
+call __println
+add $4, %esp
+push $1
+call __exit
+add $4, %esp
 .align 4
 _ic_main:
 # Prologue
@@ -145,6 +170,9 @@ _ic_main_epilogue:
 mov %ebp, %esp
 pop %ebp
 ret
+push $0
+call __exit
+add $4, %esp
 .align 4
 _C_foo:
 # Prologue
