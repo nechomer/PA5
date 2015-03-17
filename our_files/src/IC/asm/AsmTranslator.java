@@ -240,29 +240,60 @@ public class AsmTranslator {
 				// Arithmetic Instruction
 				else if(lirOp.equals("Add")){
 					
-					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
+					firstToken = formatStr(tokenizer.nextToken());
+					if(!isDigit(firstToken)){
+						firstOffset = ml.getOffset(CurrMethod, firstToken);
+						emit("mov " + firstOffset + "(%ebp), %eax");
+						
+					}else{
+						emit("mov $" + firstToken + ", %eax");
+					}
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
-		            emit("mov " + firstOffset + "(%ebp), %eax");
+		            
 		            emit("add " + secondOffset + "(%ebp), %eax");
 		            emit("movl %eax, " + secondOffset + "(%ebp)");
 
 				}
 				else if(lirOp.equals("Sub")){
 				
-					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
+					firstToken = formatStr(tokenizer.nextToken());
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
-		            emit("mov " + secondOffset + "(%ebp), %eax");
-		            emit("sub " + firstOffset + "(%ebp), %eax");
+					emit("mov " + secondOffset + "(%ebp), %eax");
+					
+					
+					if(!isDigit(firstToken)){
+						firstOffset = ml.getOffset(CurrMethod, firstToken);
+						emit("sub " + firstOffset + "(%ebp), %eax");
+						
+					}else{
+						emit("sub $" + firstToken + ", %eax");
+					}
+					
+					
 		            emit("movl %eax, " + secondOffset + "(%ebp)");
 					
 				}
 				else if(lirOp.equals("Mul")){
 					
-					firstOffset = ml.getOffset(CurrMethod, formatStr(tokenizer.nextToken()));
+					firstToken = formatStr(tokenizer.nextToken());
 					secondOffset = ml.getOffset(CurrMethod,tokenizer.nextToken());
-		            emit("mov " + secondOffset + "(%ebp), %eax");
-		            emit("imul " + firstOffset + "(%ebp), %eax");
+					emit("mov " + secondOffset + "(%ebp), %eax");
+					
+					
+					if(!isDigit(firstToken)){
+						firstOffset = ml.getOffset(CurrMethod, firstToken);
+						emit("imul " + firstOffset + "(%ebp), %eax");
+						
+					}else{
+						emit("imul $" + firstToken + ", %eax");
+					}
+					
+					
 		            emit("movl %eax, " + secondOffset + "(%ebp)");
+		            
+		            
+		            
+
 					
 				}
 				else if(lirOp.equals("Div")){
