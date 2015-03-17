@@ -118,7 +118,7 @@ public class LirTranslator implements Visitor {
 	 * @return - The method's label in LIR format
 	 */
 	private String getMethodLabel(String methodName) {
-		return methodName.equals("main") ? "_ic_main" : "_" + currClass + "_" + methodName + ":\n"; 
+		return methodName.equals("main") ? "_ic_main" : "_" + currClass + "_" + methodName; 
 	}
 	
 	/**
@@ -127,7 +127,7 @@ public class LirTranslator implements Visitor {
 	 */
 	@Override
 	public Object visit(VirtualMethod method) {
-		String label = "\n" + getMethodLabel(method.getName());
+		String label = "\n" + getMethodLabel(method.getName()) + ":\n";
 		String lir = visitMethod(method);
 		
 		if( method.getType().getName().equals("void"))
@@ -607,7 +607,7 @@ public class LirTranslator implements Visitor {
 		List<Formal> fl = call.getMethod().getFormals();
 		String lir ="";
 		for ( int i = 0; i < fl.size() ; i++ ) {
-			lir += fl.get(i).getName() + "=" + paramRegs.get(i) + ((i+1==fl.size()) ? "" : ", ");
+			lir += fl.get(i).getName() + "=" + paramRegs.get(i) + ((i+1==fl.size()) ? "" : ",");
 		}
 		return lir;
 	}
@@ -1009,7 +1009,7 @@ public class LirTranslator implements Visitor {
 	 * @return The LIR representation of an array access - Checks it's a valid idx
 	 */
 	private String arrIdxOutOfBoundsCheckStr(String arrReg, String idxReg) {
-		return "StaticCall __checkArrayAccess(a=" + arrReg + ", i=" + idxReg + "), Rdummy\n";
+		return "StaticCall __checkArrayAccess(a=" + arrReg + ",i=" + idxReg + "), Rdummy\n";
 	}
 
 	/**

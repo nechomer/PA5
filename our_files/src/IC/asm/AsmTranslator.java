@@ -391,7 +391,7 @@ public class AsmTranslator {
 				}
 				else if(lirOp.equals("StaticCall")){
 					
-					firstToken = tokenizer.nextToken();
+					firstToken = formatStr(tokenizer.nextToken());
 					secondToken = tokenizer.nextToken();
 					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
 					String funcName = getFuncFromCall(firstToken);
@@ -482,7 +482,7 @@ public class AsmTranslator {
     
     private static Map<String,String> makeParamsToRegs(String str){
     	 	
-		StringTokenizer tokenizer = new StringTokenizer(str); 	
+		StringTokenizer tokenizer = new StringTokenizer(str,",");
 		if(!tokenizer.hasMoreTokens())
 			return null;
 		
@@ -533,14 +533,14 @@ public class AsmTranslator {
     	
     	int endReg1 = token.indexOf("[");
     	int endReg2 = token.indexOf("]");
-    	regs[0] = token.substring(0, endReg1-1);
-    	regs[1] = token.substring(endReg1+1, endReg2-1);
+    	regs[0] = token.substring(0, endReg1);
+    	regs[1] = token.substring(endReg1+1, endReg2);
     	
     }
     
     private void getFieldRegs(String token, String[] regs){
     	
-    	String[] tmp = token.split(".");
+    	String[] tmp = token.split("\\.");
     	regs[0] = tmp[0];
     	regs[1] = tmp[1];
     	
