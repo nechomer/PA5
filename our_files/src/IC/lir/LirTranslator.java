@@ -952,7 +952,7 @@ public class LirTranslator implements Visitor {
 	"	JumpL _error2\n" +
 	"	ArrayLength a, R0\n" +
 	"	Compare i, R0\n" +
-	"	JumpLE _error2" +
+	"	JumpLE _error2\n" +
 	"	Return Rdummy\n" +
 	"_error2:\n" +
 	"	Library __println(str_err_arr_out_of_bounds), Rdummy\n" +
@@ -987,7 +987,7 @@ public class LirTranslator implements Visitor {
 	"# }\n" +
 	"__checkZero:\n" +
 	"	Move b, R0\n" +
-	"	Compare 0, R0" +
+	"	Compare 0, R0\n" +
 	"	JumpTrue _error4\n" +
 	"	Return Rdummy\n" +
 	"_error4:\n" +
