@@ -482,10 +482,10 @@ public class AsmTranslator {
 					
 					objectOffset = ml.getOffset(CurrMethod, regs[0]);
 					emit("mov " + objectOffset + "(%ebp), %eax");
-			        emit("push ");
+			        emit("push %eax");
 			        emit("mov 0(%eax), %eax");
 
-			        emit("call *" + 4 * Integer.parseInt(regs[1]) + "(%eax)");
+			        emit("call " + 4 * Integer.parseInt(regs[1]) + "(%eax)");
 			        
 					if(!secondToken.equals("Rdummy")) {
 						
