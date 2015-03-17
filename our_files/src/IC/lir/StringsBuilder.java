@@ -3,6 +3,7 @@ package IC.lir;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import IC.LiteralTypes;
 import IC.AST.ArrayLocation;
@@ -282,6 +283,10 @@ public class StringsBuilder implements Visitor {
 		}
 			
 		return str;
+	}
+	
+	public static Set<String> exportStringsSet(){
+		return strings.keySet();
 	}
 
 	public static String exportStringLirTable() {
