@@ -424,9 +424,9 @@ public class AsmTranslator {
 					
 					for(String reg:regs){
 						if(reg.startsWith("R")){
-				            regOffset = ml.getOffset(funcName, reg);
+				            regOffset = ml.getOffset(CurrMethod, reg);
 				            emit("mov " + regOffset + "(%ebp), %eax");
-				            emit("push ");
+				            emit("push %eax");
 						} else{
 							emit("push $" + reg);
 						}
@@ -635,8 +635,8 @@ public class AsmTranslator {
     private void makePrologue(String currMethod) {
     	
         emit("# Prologue");
-        emit("push ($ebp)");
-        emit("mov %esp, ($ebp)");
+        emit("push (%ebp)");
+        emit("mov %esp, (%ebp)");
         if ( ml.getVarStackSize(currMethod) > 0) {
         	emit("sub $" + ml.getVarStackSize(currMethod) + ", %esp");
         }

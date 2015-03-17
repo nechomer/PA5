@@ -80,7 +80,8 @@ public class MethodLayouts {
 	    private int lastVarOffset = -4, lastParameterOffset = 8;
 	    
 	    public int getOffset(String regName) {
-	    	return (offsets.get(regName));
+	    	if (!offsets.containsKey(regName)) return 0;
+	    	return offsets.get(regName);
 	    }
 	    
 	    public void insertVar(String regName) {
