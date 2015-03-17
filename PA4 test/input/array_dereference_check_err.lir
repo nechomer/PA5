@@ -83,7 +83,7 @@ Move 0, arr_main
 Move arr_main, R2
 StaticCall __checkNullRef(a=R2), Rdummy
 Move 1, R3
-StaticCall __checkArrayAccess(a=R2, i=R3), Rdummy
+StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
 MoveArray R2[R3], R1
 StaticCall __checkNullRef(a=R1), Rdummy
 VirtualCall R1.0(), Rdummy

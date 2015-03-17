@@ -455,11 +455,12 @@ public class AsmTranslator {
 				}
 			}
 			
-			String asmFileName = lirFileName.replaceAll(".lir$", ".s");
+			String asmFileName = lirFileName.replaceAll(".ic$", ".s");
 			
-			BufferedWriter fw = null;
+			FileWriter fw = null;
 			try {
-				fw = new BufferedWriter(new FileWriter(asmFileName));
+				fw = new FileWriter(asmFileName);
+				fw.write(sb.toString());
 			} catch (IOException e) {
 			}
 			finally {
