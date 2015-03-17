@@ -932,9 +932,8 @@ public class LirTranslator implements Visitor {
 	"	JumpTrue _error1\n" +
 	"	Return Rdummy\n" +
 	"_error1:\n" +
-	"	Move str_err_null_ptr_ref, R0\n" + 
-	"	Library __println(R0), Rdummy\n" +
-	"	Library __exit(1), Rdummy\n" + 
+	"	Library __println(str_err_null_ptr_ref),Rdummy\n" +
+	"	Library __exit(1),Rdummy\n" + 
 	"\n";
 
 	/**
@@ -956,8 +955,7 @@ public class LirTranslator implements Visitor {
 	"	JumpLE _error2\n" +
 	"	Return Rdummy\n" +
 	"_error2:\n" +
-	"	Move str_err_arr_out_of_bounds, R0\n" + 
-	"	Library __println(R0), Rdummy\n" +
+	"	Library __println(str_err_arr_out_of_bounds), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"\n";
 
@@ -975,8 +973,7 @@ public class LirTranslator implements Visitor {
 	"	JumpLE _error3\n" +
 	"	Return Rdummy\n" +
 	"_error3:\n" +
-	"	Move str_err_neg_arr_size, R0\n" + 
-	"	Library __println(R0), Rdummy\n" +
+	"	Library __println(str_err_neg_arr_size), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"\n";
 
@@ -994,8 +991,7 @@ public class LirTranslator implements Visitor {
 	"	JumpTrue _error4\n" +
 	"	Return Rdummy\n" +
 	"_error4:\n" +
-	"	Move str_err_div_by_zero, R0\n" + 
-	"	Library __println(R0), Rdummy\n" +
+	"	Library __println(str_err_div_by_zero), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"\n";
 

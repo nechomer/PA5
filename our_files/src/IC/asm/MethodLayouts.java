@@ -52,10 +52,10 @@ public class MethodLayouts {
     	insertErrorCheckLayout("__checkArrayAccess", regArray, paramArrayCheckArrayAccess);
     	insertErrorCheckLayout("__checkSize", regArray, paramArrayCheckSize);
     	insertErrorCheckLayout("__checkZero", regArray, paramArrayCheckZero);
-    	insertErrorCheckLayout("_error1", regArray, null);
-    	insertErrorCheckLayout("_error2", regArray, null);
-    	insertErrorCheckLayout("_error3", regArray, null);
-    	insertErrorCheckLayout("_error4", regArray, null);
+    	insertErrorCheckLayout("_error1", null, null);
+    	insertErrorCheckLayout("_error2", null, null);
+    	insertErrorCheckLayout("_error3", null, null);
+    	insertErrorCheckLayout("_error4", null, null);
     }
     
     private void insertErrorCheckLayout(String methodName, String[] regs, String[] parameters) {
