@@ -386,11 +386,21 @@ public class AsmTranslator {
 				else if(lirOp.equals("Library")){
 					
 					firstToken = tokenizer.nextToken();
-					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
 					String funcName = getFuncFromCall(firstToken);
 					
-					if(paramMap != null)
-						pushVars(CurrMethod, funcName, paramMap);
+					String[] regs = getRegsFromLibCall(getParamsFromCall(firstToken));
+					int regOffset = 0;
+					
+					for(String reg:regs){
+						if(reg.startsWith("R")){
+				            regOffset = ml.getOffset(funcName, reg);
+				            emit("mov " + regOffset + "(%ebp), %eax");
+				            emit("push %eax");
+						} else{
+							emit("push $" + reg);
+						}
+							
+					}
 					
 					emit("call " + funcName);
 					
@@ -401,8 +411,8 @@ public class AsmTranslator {
 						
 					}
 					
-					if(paramMap != null)
-						emit("add $" + 4 * paramMap.size() + ", %esp");
+					if(regs.length != 0)
+						emit("add $" + 4 * regs.length + ", %esp");
 							
 				}
 				else if(lirOp.equals("StaticCall")){
@@ -515,6 +525,10 @@ public class AsmTranslator {
 		
 		return ret;
     	
+    }
+    
+    private static String[] getRegsFromLibCall(String str){
+	 	return str.split(",");
     }
     
     private void emit(String str) {
