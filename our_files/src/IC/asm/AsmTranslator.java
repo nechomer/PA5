@@ -418,7 +418,7 @@ public class AsmTranslator {
 					
 					firstToken = tokenizer.nextToken();
 					String funcName = getFuncFromCall(firstToken);
-					
+					secondToken = tokenizer.nextToken();
 					String[] regs = getRegsFromLibCall(getParamsFromCall(firstToken));
 					int regOffset = 0;
 					
@@ -426,7 +426,7 @@ public class AsmTranslator {
 						if(reg.startsWith("R")){
 				            regOffset = ml.getOffset(funcName, reg);
 				            emit("mov " + regOffset + "(%ebp), %eax");
-				            emit("push %eax");
+				            emit("push ");
 						} else{
 							emit("push $" + reg);
 						}
@@ -482,7 +482,7 @@ public class AsmTranslator {
 					
 					objectOffset = ml.getOffset(CurrMethod, regs[0]);
 					emit("mov " + objectOffset + "(%ebp), %eax");
-			        emit("push %eax");
+			        emit("push ");
 			        emit("mov 0(%eax), %eax");
 
 			        emit("call *" + 4 * Integer.parseInt(regs[1]) + "(%eax)");
@@ -628,16 +628,18 @@ public class AsmTranslator {
     	
         emit("# Epilogue");
         emit(currMethod + "_epilogue:");
-        emit("mov %ebp, %esp");
-        emit("pop %ebp");
+        emit("mov (%ebp), %esp");
+        emit("pop (%ebp)");
         emit("ret");
     }
     private void makePrologue(String currMethod) {
     	
         emit("# Prologue");
-        emit("push %ebp");
-        emit("mov %esp, %ebp");
-        emit("sub $" + ml.getVarStackSize(currMethod) + ", %esp");
+        emit("push ($ebp)");
+        emit("mov %esp, ($ebp)");
+        if ( ml.getVarStackSize(currMethod) > 0) {
+        	emit("sub $" + ml.getVarStackSize(currMethod) + ", %esp");
+        }
     	
     }
 	

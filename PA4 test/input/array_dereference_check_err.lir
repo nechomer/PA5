@@ -32,8 +32,7 @@ __checkNullRef:
 	JumpTrue _error1
 	Return Rdummy
 _error1:
-	Move str_err_null_ptr_ref, R0
-	Library __println(R0), Rdummy
+	Library __println(str_err_null_ptr_ref), Rdummy
 	Library __exit(1), Rdummy
 
 # Check Array Index Out Of Bounds:
@@ -51,8 +50,7 @@ __checkArrayAccess:
 	JumpLE _error2
 	Return Rdummy
 _error2:
-	Move str_err_arr_out_of_bounds, R0
-	Library __println(R0), Rdummy
+	Library __println(str_err_arr_out_of_bounds), Rdummy
 	Library __exit(1), Rdummy
 
 # Check Array Allocation Is Not With Negative Number:
@@ -65,8 +63,7 @@ __checkSize:
 	JumpLE _error3
 	Return Rdummy
 _error3:
-	Move str_err_neg_arr_size, R0
-	Library __println(R0), Rdummy
+	Library __println(str_err_neg_arr_size), Rdummy
 	Library __exit(1), Rdummy
 
 # Check Division By Zero:
@@ -79,8 +76,7 @@ __checkZero:
 	JumpTrue _error4
 	Return Rdummy
 _error4:
-	Move str_err_div_by_zero, R0
-	Library __println(R0), Rdummy
+	Library __println(str_err_div_by_zero), Rdummy
 	Library __exit(1), Rdummy
 
 
@@ -93,9 +89,9 @@ StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
 MoveArray R2[R3], R1
 StaticCall __checkNullRef(a=R1), Rdummy
 VirtualCall R1.0(), Rdummy
-# End Of Method Block
 Library __exit(0), Rdummy
+# End Of Method Block
 
 _C_foo:
-# End Of Method Block
 Return Rdummy
+# End Of Method Block
