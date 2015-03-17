@@ -118,7 +118,7 @@ public class LirTranslator implements Visitor {
 	 * @return - The method's label in LIR format
 	 */
 	private String getMethodLabel(String methodName) {
-		return methodName.equals("main") ? "_ic_main" : "_" + currClass + "_" + methodName; 
+		return methodName.equals("main") ? "__ic_main" : "_" + currClass + "_" + methodName; 
 	}
 	
 	/**
@@ -149,7 +149,7 @@ public class LirTranslator implements Visitor {
 			//Main method is also static - So it should have a program exit instruction
 			//attached at the end of the LIR code
 			if(method.getName().equals("main")){
-				label = "\n_ic_main:\n";
+				label = "\n__ic_main:\n";
 				lir += "Library __exit(0), Rdummy\n";
 			}
 			else {
@@ -929,9 +929,9 @@ public class LirTranslator implements Visitor {
 	"__checkNullRef:\n" +
 	"	Move a, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpTrue _error1\n" +
+	"	JumpTrue __checkNullRef_epilogue\n" +
 	"	Return Rdummy\n" +
-	"_error1:\n" +
+	"__checkNullRef_epilogue:\n" +
 	"	Library __println(str_err_null_ptr_ref), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"\n";
@@ -949,12 +949,12 @@ public class LirTranslator implements Visitor {
 	"__checkArrayAccess:\n" +
 	"	Move i, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpL _error2\n" +
+	"	JumpL __checkArrayAccess_epilogue\n" +
 	"	ArrayLength a, R0\n" +
 	"	Compare i, R0\n" +
-	"	JumpLE _error2\n" +
+	"	JumpLE __checkArrayAccess_epilogue\n" +
 	"	Return Rdummy\n" +
-	"_error2:\n" +
+	"__checkArrayAccess_epilogue:\n" +
 	"	Library __println(str_err_arr_out_of_bounds), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"\n";
@@ -970,9 +970,9 @@ public class LirTranslator implements Visitor {
 	"__checkSize:\n" +
 	"	Move n, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpLE _error3\n" +
+	"	JumpLE __checkSize_epilogue\n" +
 	"	Return Rdummy\n" +
-	"_error3:\n" +
+	"__checkSize_epilogue:\n" +
 	"	Library __println(str_err_neg_arr_size), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"\n";
@@ -988,9 +988,9 @@ public class LirTranslator implements Visitor {
 	"__checkZero:\n" +
 	"	Move b, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpTrue _error4\n" +
+	"	JumpTrue __checkZero_epilogue\n" +
 	"	Return Rdummy\n" +
-	"_error4:\n" +
+	"__checkZero_epilogue:\n" +
 	"	Library __println(str_err_div_by_zero), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"\n";

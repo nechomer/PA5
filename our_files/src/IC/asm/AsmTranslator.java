@@ -39,7 +39,7 @@ public class AsmTranslator {
 		result = result.replaceAll(".lir", ".ic");
 		result += "\"\n\n";
 		result += "# global declarations\n";
-		result += ".global _ic_main\n\n";
+		result += ".global __ic_main\n\n";
 		result += "# data section \n.data\n";
 		result += "\t.align 4\n\n";
 		sb.append(result);
@@ -153,7 +153,7 @@ public class AsmTranslator {
 					firstToken = formatStr(tokenizer.nextToken());
 					secondOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
 					
-					if (!isMem(firstToken)) {
+					if (!isMem(firstToken) && ml.getOffset(CurrMethod, firstToken) == 0) {
 						
 						emit("movl $" + firstToken + ", " + secondOffset + "(%ebp)");
 						
@@ -485,7 +485,7 @@ public class AsmTranslator {
 			        emit("push %eax");
 			        emit("mov 0(%eax), %eax");
 
-			        emit("call " + 4 * Integer.parseInt(regs[1]) + "(%eax)");
+			        emit("call *" + 4 * Integer.parseInt(regs[1]) + "(%eax)");
 			        
 					if(!secondToken.equals("Rdummy")) {
 						

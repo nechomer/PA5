@@ -6,7 +6,6 @@ class ArrDereferenceCheck {
 
     	//check arr is null, not initialized, should print error
     	arr[1].foo();
-
     }
 }
 

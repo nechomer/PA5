@@ -1,7 +1,7 @@
 .title "array_dereference_check_err.ic"
 
 # global declarations
-.global _ic_main
+.global __ic_main
 
 # data section 
 .data
@@ -29,12 +29,13 @@ __checkNullRef:
 push (%ebp)
 mov %esp, (%ebp)
 sub $4, %esp
-movl $a, -4(%ebp)
+mov 8(%ebp), %eax
+movl %eax, -4(%ebp)
 mov -4(%ebp), %eax
 cmp $0, %eax
 jmp __checkNullRef_epilogue
 .align 4
-_error1:
+__checkNullRef_epilogue:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
@@ -56,19 +57,20 @@ __checkArrayAccess:
 push (%ebp)
 mov %esp, (%ebp)
 sub $4, %esp
-movl $i, -4(%ebp)
+mov 12(%ebp), %eax
+movl %eax, -4(%ebp)
 mov -4(%ebp), %eax
 cmp $0, %eax
-jl _error2
+jl __checkArrayAccess_epilogue
 mov 8(%ebp), %ebx
 mov -4(%ebx), %ebx
 movl %ebx, -4(%ebp)
 mov -4(%ebp), %eax
 cmp 12(%ebp), %eax
-jle _error2
+jle __checkArrayAccess_epilogue
 jmp __checkArrayAccess_epilogue
 .align 4
-_error2:
+__checkArrayAccess_epilogue:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
@@ -88,13 +90,14 @@ __checkSize:
 push (%ebp)
 mov %esp, (%ebp)
 sub $4, %esp
-movl $n, -4(%ebp)
+mov 8(%ebp), %eax
+movl %eax, -4(%ebp)
 mov -4(%ebp), %eax
 cmp $0, %eax
-jle _error3
+jle __checkSize_epilogue
 jmp __checkSize_epilogue
 .align 4
-_error3:
+__checkSize_epilogue:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
@@ -114,12 +117,13 @@ __checkZero:
 push (%ebp)
 mov %esp, (%ebp)
 sub $4, %esp
-movl $b, -4(%ebp)
+mov 8(%ebp), %eax
+movl %eax, -4(%ebp)
 mov -4(%ebp), %eax
 cmp $0, %eax
 jmp __checkZero_epilogue
 .align 4
-_error4:
+__checkZero_epilogue:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
@@ -130,13 +134,14 @@ push $1
 call __exit
 add $4, %esp
 .align 4
-_ic_main:
+__ic_main:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
 sub $20, %esp
 movl $0, -4(%ebp)
-movl $arr_main, -16(%ebp)
+mov -4(%ebp), %eax
+movl %eax, -16(%ebp)
 mov -16(%ebp), %eax
 push %eax
 call __checkNullRef
@@ -159,13 +164,13 @@ add $4, %esp
 mov -12(%ebp), %eax
 push %eax
 mov 0(%eax), %eax
-call 0(%eax)
+call *0(%eax)
 push $0
 call __exit
 add $4, %esp
 # End Of Method Block
 # Epilogue
-_ic_main_epilogue:
+__ic_main_epilogue:
 mov (%ebp), %esp
 pop (%ebp)
 ret
