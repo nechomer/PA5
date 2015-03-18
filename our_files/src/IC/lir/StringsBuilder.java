@@ -303,10 +303,15 @@ public class StringsBuilder implements Visitor {
 	}
 	
 	private static String buildErrorStrings(boolean forAsm) {
-
-		String str = "str_err_null_ptr_ref:	"+ ((forAsm)? ".string":"") +"	\"Runtime Error: Null pointer dereference!\"\n";
+		
+		String str = "";
+		if(forAsm) str+="	.int 40\n";
+		str += "str_err_null_ptr_ref:	"+ ((forAsm)? ".string":"") +"	\"Runtime Error: Null pointer dereference!\"\n";
+		if(forAsm) str+="	.int 41\n";
 		str+= "str_err_arr_out_of_bounds: "+ ((forAsm)? ".string":"") +"	\"Runtime Error: Array index out of bounds!\"\n";
+		if(forAsm) str+="	.int 57\n";
 		str+= "str_err_neg_arr_size: "+ ((forAsm)? ".string":"") +"	\"Runtime Error: Array allocation with negative array size!\"\n";
+		if(forAsm) str+="	.int 32\n";
 		str+= "str_err_div_by_zero: "+ ((forAsm)? ".string":"") +"	\"Runtime Error: Division by zero!\"\n";
 		return str;
 	}

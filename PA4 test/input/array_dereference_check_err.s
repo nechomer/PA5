@@ -7,10 +7,14 @@
 .data
 	.align 4
 
-.int 40str_err_null_ptr_ref:	.string	"Runtime Error: Null pointer dereference!"
-.int 41str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
-.int 57str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
-.int 32str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
+	.int 40
+str_err_null_ptr_ref:	.string	"Runtime Error: Null pointer dereference!"
+	.int 41
+str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
+	.int 57
+str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
+	.int 32
+str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
 .int 4
 str1: .string	"roey"
 _DV_ArrDereferenceCheck: 
