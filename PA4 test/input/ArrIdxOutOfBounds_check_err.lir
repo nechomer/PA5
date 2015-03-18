@@ -1,7 +1,8 @@
 str_err_null_ptr_ref:		"Runtime Error: Null pointer dereference!"
-str_err_arr_out_of_bounds:	"Runtime Error: Array index out of bounds!"
-str_err_neg_arr_size:	"Runtime Error: Array allocation with negative array size!"
-str_err_div_by_zero:	"Runtime Error: Division by zero!"
+str_err_arr_out_of_bounds: 	"Runtime Error: Array index out of bounds!"
+str_err_neg_arr_size: 	"Runtime Error: Array allocation with negative array size!"
+str_err_div_by_zero: 	"Runtime Error: Division by zero!"
+# End of constant strings section
 
 # class ArrIdxOutOfBounds
 # Dispatch vector:
@@ -13,6 +14,7 @@ _DV_ArrIdxOutOfBounds: []
 _DV_C: []
 # Field offsets
 
+# End of dispatch table section
 
 # Check Null Ptr Reference:
 # static void checkNullRef(array a){
@@ -23,11 +25,11 @@ _DV_C: []
 __checkNullRef:
 	Move a, R0
 	Compare 0, R0
-	JumpTrue _error1
+	JumpTrue __checkNullRef_epilogue
 	Return Rdummy
-_error1:
-	Library __println(str_err_null_ptr_ref),Rdummy
-	Library __exit(1),Rdummy
+__checkNullRef_epilogue:
+	Library __println(str_err_null_ptr_ref), Rdummy
+	Library __exit(1), Rdummy
 
 # Check Array Index Out Of Bounds:
 # static void checkArrayAccess(array a, index i) {
@@ -38,13 +40,14 @@ _error1:
 __checkArrayAccess:
 	Move i, R0
 	Compare 0, R0
-	JumpL _error2
+	JumpL __checkArrayAccess_epilogue
 	ArrayLength a, R0
 	Compare i, R0
-	JumpLE _error2	Return Rdummy
-_error2:
-	Library __println(str_err_arr_out_of_bounds),Rdummy
-	Library __exit(1),Rdummy
+	JumpLE __checkArrayAccess_epilogue
+	Return Rdummy
+__checkArrayAccess_epilogue:
+	Library __println(str_err_arr_out_of_bounds), Rdummy
+	Library __exit(1), Rdummy
 
 # Check Array Allocation Is Not With Negative Number:
 # static void checkSize(size n) {
@@ -53,11 +56,11 @@ _error2:
 __checkSize:
 	Move n, R0
 	Compare 0, R0
-	JumpLE _error3
+	JumpLE __checkSize_epilogue
 	Return Rdummy
-_error3:
-	Library __println(str_err_neg_arr_size),Rdummy
-	Library __exit(1),Rdummy
+__checkSize_epilogue:
+	Library __println(str_err_neg_arr_size), Rdummy
+	Library __exit(1), Rdummy
 
 # Check Division By Zero:
 # static void checkZero(value b) {
@@ -65,29 +68,31 @@ _error3:
 # }
 __checkZero:
 	Move b, R0
-	Compare 0, R0	JumpTrue _error4
+	Compare 0, R0
+	JumpTrue __checkZero_epilogue
 	Return Rdummy
-_error4:
-	Library __println(str_err_div_by_zero),Rdummy
-	Library __exit(1),Rdummy
+__checkZero_epilogue:
+	Library __println(str_err_div_by_zero), Rdummy
+	Library __exit(1), Rdummy
 
 
-_ic_main:
+__ic_main:
 StaticCall _C_foo(), R0
-Library __exit(0),Rdummy
+Library __exit(0), Rdummy
+# End Of Method Block
 
-_C_foo:
-Move 2, R1
-StaticCall __checkSize(n=R1),Rdummy
+_C_fooMove 2, R1
+StaticCall __checkSize(n=R1), Rdummy
 Mul 4, R1
 Library __allocateArray(R1), R0
-Move R0, x
-Move 0, y
-Move x, R1
-StaticCall __checkNullRef(a=R1),Rdummy
+Move R0, x_main
+Move 0, y_main
+Move x_main, R1
+StaticCall __checkNullRef(a=R1), Rdummy
 Move 2, R2
-StaticCall __checkArrayAccess(a=R1, i=R2),Rdummy
+StaticCall __checkArrayAccess(a=R1,i=R2), Rdummy
 MoveArray R1[R2], R0
-Move R0, y
+Move R0, y_main
 Move 1, R0
 Return R0
+# End Of Method Block

@@ -7,10 +7,12 @@
 .data
 	.align 4
 
-str_err_null_ptr_ref:	.string	"Runtime Error: Null pointer dereference!"
-str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
-str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
-str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
+.int 40str_err_null_ptr_ref:	.string	"Runtime Error: Null pointer dereference!"
+.int 41str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
+.int 57str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
+.int 32str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
+.int 4
+str1: .string	"roey"
 _DV_ArrDereferenceCheck: 
 
 _DV_C:  .long _C_foo
@@ -165,6 +167,15 @@ mov -12(%ebp), %eax
 push %eax
 mov 0(%eax), %eax
 call *0(%eax)
+movl $str1, -12(%ebp)
+mov -12(%ebp), %eax
+push %eax
+call __checkNullRef
+add $4, %esp
+mov -12(%ebp), %eax
+push %eax
+call __println
+add $4, %esp
 push $0
 call __exit
 add $4, %esp

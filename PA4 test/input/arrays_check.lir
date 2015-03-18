@@ -22,9 +22,9 @@ _DV_Arrays: []
 __checkNullRef:
 	Move a, R0
 	Compare 0, R0
-	JumpTrue _error1
+	JumpTrue __checkNullRef_epilogue
 	Return Rdummy
-_error1:
+__checkNullRef_epilogue:
 	Library __println(str_err_null_ptr_ref), Rdummy
 	Library __exit(1), Rdummy
 
@@ -37,12 +37,12 @@ _error1:
 __checkArrayAccess:
 	Move i, R0
 	Compare 0, R0
-	JumpL _error2
+	JumpL __checkArrayAccess_epilogue
 	ArrayLength a, R0
 	Compare i, R0
-	JumpLE _error2
+	JumpLE __checkArrayAccess_epilogue
 	Return Rdummy
-_error2:
+__checkArrayAccess_epilogue:
 	Library __println(str_err_arr_out_of_bounds), Rdummy
 	Library __exit(1), Rdummy
 
@@ -53,9 +53,9 @@ _error2:
 __checkSize:
 	Move n, R0
 	Compare 0, R0
-	JumpLE _error3
+	JumpLE __checkSize_epilogue
 	Return Rdummy
-_error3:
+__checkSize_epilogue:
 	Library __println(str_err_neg_arr_size), Rdummy
 	Library __exit(1), Rdummy
 
@@ -66,14 +66,14 @@ _error3:
 __checkZero:
 	Move b, R0
 	Compare 0, R0
-	JumpTrue _error4
+	JumpTrue __checkZero_epilogue
 	Return Rdummy
-_error4:
+__checkZero_epilogue:
 	Library __println(str_err_div_by_zero), Rdummy
 	Library __exit(1), Rdummy
 
 
-_ic_main:
+__ic_main:
 Move 5, R1
 StaticCall __checkSize(n=R1), Rdummy
 Mul 4, R1
