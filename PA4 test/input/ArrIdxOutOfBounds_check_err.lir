@@ -81,7 +81,8 @@ StaticCall _C_foo(), R0
 Library __exit(0), Rdummy
 # End Of Method Block
 
-_C_fooMove 2, R1
+_C_foo:
+Move 2, R1
 StaticCall __checkSize(n=R1), Rdummy
 Mul 4, R1
 Library __allocateArray(R1), R0

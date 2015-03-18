@@ -142,7 +142,7 @@ public class LirTranslator implements Visitor {
 	 */
 	@Override
 	public Object visit(StaticMethod method) {
-		String label = "\n" + getMethodLabel(method.getName());
+		String label = "\n" + getMethodLabel(method.getName()) + ":\n";
 		String lir = visitMethod(method);
 		
 		if( method.getType().getName().equals("void")) {
