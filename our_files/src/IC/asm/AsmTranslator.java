@@ -661,9 +661,10 @@ public class AsmTranslator {
     }
     private static int getVirtualMethodOffset(String str) {
     	int dotIndex = -1;
+    	int braceIndex = -1;
     	String ret = str;
-    	if((dotIndex = str.indexOf(".")) != -1) {
-    		ret = str.substring(dotIndex);
+    	if(((dotIndex = str.indexOf(".")) != -1) && ((braceIndex = str.indexOf("(")) != -1)) {
+    		ret = str.substring(dotIndex+1, braceIndex);
     	}
     	return Integer.parseInt(ret);
     }
