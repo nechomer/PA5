@@ -135,7 +135,6 @@ public class AsmTranslator {
 						makeEpilogueForFunc(CurrMethod);
 					continue;
 				}
-				
 				if (line.startsWith("_")) {
 					String label = line.substring(0, line.length()-1);
 					System.out.println(label);
@@ -464,6 +463,7 @@ public class AsmTranslator {
 					} 	else if (funcName.equals("__checkSize")) {
 						makeVarForErrorCheck(CurrMethod, funcName, paramMap);
 						makeArrIdxCheck();
+						bufReader.readLine();
 					} 	else if (funcName.equals("__checkZero")) {
 						makeVarForErrorCheck(CurrMethod, funcName, paramMap);
 						makeZeroDivCheck();

@@ -220,18 +220,20 @@ public class FrameScope {
 	* @param id
 	* @return the scope name of the id
 	*/
-	public String[] retrieveScopeName() {
+	public String[] retrieveScopeName(String varName) {
 		FrameScope scope = this;
 		String[] methodNameAndScope = new String[2];
 		String scopeStr = "";
-		int numIter = -1;
+		Boolean flag = false;
 		while (scope != null && scope.getType() != ScopeType.Method) {
-			numIter++;
+			if(!flag && scope.localVars.containsKey(varName)) {
+				scopeStr += "_" + scope.getName().replace(" ", "_");
+				flag = true;
+			}
 			scope = scope.getParent();
-			scopeStr += "_" + scope.getName();
 		}
 		methodNameAndScope[0] = scope.getName();
-		methodNameAndScope[1] = (numIter > 0) ? scopeStr : "main";
+		methodNameAndScope[1] = (!scopeStr.equals("")) ? scopeStr : "main";
 		return methodNameAndScope;
 	}
 
