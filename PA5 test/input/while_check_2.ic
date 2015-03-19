@@ -1,7 +1,7 @@
 class A {
   static void main(string[] args) {
     
-    int i;
+    int i = 0;
     int j;
 
     while ( 1 < 2 ) {

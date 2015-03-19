@@ -25,11 +25,12 @@ _DV_C: []
 __checkNullRef:
 	Move a, R0
 	Compare 0, R0
-	JumpTrue __checkNullRef_epilogue
+	JumpTrue __checkNullRef_fault
 	Return Rdummy
-__checkNullRef_epilogue:
+__checkNullRef_fault:
 	Library __println(str_err_null_ptr_ref), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Array Index Out Of Bounds:
 # static void checkArrayAccess(array a, index i) {
@@ -40,14 +41,15 @@ __checkNullRef_epilogue:
 __checkArrayAccess:
 	Move i, R0
 	Compare 0, R0
-	JumpL __checkArrayAccess_epilogue
+	JumpL __checkArrayAccess_fault
 	ArrayLength a, R0
 	Compare i, R0
-	JumpLE __checkArrayAccess_epilogue
+	JumpLE __checkArrayAccess_fault
 	Return Rdummy
-__checkArrayAccess_epilogue:
+__checkArrayAccess_fault:
 	Library __println(str_err_arr_out_of_bounds), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Array Allocation Is Not With Negative Number:
 # static void checkSize(size n) {
@@ -56,11 +58,12 @@ __checkArrayAccess_epilogue:
 __checkSize:
 	Move n, R0
 	Compare 0, R0
-	JumpLE __checkSize_epilogue
+	JumpLE __checkSize_fault
 	Return Rdummy
-__checkSize_epilogue:
+__checkSize_fault:
 	Library __println(str_err_neg_arr_size), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Division By Zero:
 # static void checkZero(value b) {
@@ -69,11 +72,12 @@ __checkSize_epilogue:
 __checkZero:
 	Move b, R0
 	Compare 0, R0
-	JumpTrue __checkZero_epilogue
+	JumpTrue __checkZero_fault
 	Return Rdummy
-__checkZero_epilogue:
+__checkZero_fault:
 	Library __println(str_err_div_by_zero), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 
 __ic_main:

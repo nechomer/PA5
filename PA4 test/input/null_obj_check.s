@@ -1,4 +1,4 @@
-.title "array_dereference_check_err.ic"
+.title "null_obj_check.ic"
 
 # global declarations
 .global __ic_main
@@ -15,11 +15,9 @@ str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
 str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
 	.int 32
 str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
-.int 4
-str1: .string	"roey"
-_DV_ArrDereferenceCheck: 
+_DV_NullObj: 
 
-_DV_C:  .long _C_foo
+_DV_A:  .long _A_foo
 	
 
 .text
@@ -276,59 +274,80 @@ push (%ebp)
 mov %esp, (%ebp)
 sub $20, %esp
 
-# Move 0, arr_main
-movl $0, -4(%ebp)
+# Move 0, R0
+movl $0, -8(%ebp)
 
-# Move arr_main, R2
-mov -4(%ebp), %eax
+# Move R0, a_main
+mov -8(%ebp), %eax
+movl %eax, -4(%ebp)
+
+# Library __allocateObject(8), R0
+push $8
+call __allocateObject
+movl %eax, -8(%ebp)
+add $4, %esp
+
+# MoveField _DV_A, R0.0
+mov -8(%ebp), %ebx
+movl $_DV_A, (%ebx)
+
+# Move R0, b_main
+mov -8(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Move b_main, R1
+mov -12(%ebp), %eax
 movl %eax, -16(%ebp)
 
-# StaticCall __checkNullRef(a=R2), Rdummy
-mov -16(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Move 1, R3
-movl $1, -20(%ebp)
-
-# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
-mov -16(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -12(%ebp)
-
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
+mov -16(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
 # VirtualCall R1.0(), Rdummy
-mov -12(%ebp), %eax
+mov -16(%ebp), %eax
 push %eax
 mov 0(%eax), %eax
 call *0(%eax)
 
-# Move str1, R1
-movl $str1, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
+# Move b_main, R2
 mov -12(%ebp), %eax
+movl %eax, -20(%ebp)
+
+# StaticCall __checkNullRef(a=R2), Rdummy
+mov -20(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Library __println(R1), Rdummy
-mov -12(%ebp), %eax
+# MoveField R2.1, R1
+mov -20(%ebp), %ebx
+mov 0(%ebx), %eax
+movl %eax, -16(%ebp)
+
+# Library __printi(R1), Rdummy
+mov -16(%ebp), %eax
 push %eax
-call __println
+call __printi
+add $4, %esp
+
+# Move a_main, R2
+mov -4(%ebp), %eax
+movl %eax, -20(%ebp)
+
+# StaticCall __checkNullRef(a=R2), Rdummy
+mov -20(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# MoveField R2.1, R1
+mov -20(%ebp), %ebx
+mov 0(%ebx), %eax
+movl %eax, -16(%ebp)
+
+# Library __printi(R1), Rdummy
+mov -16(%ebp), %eax
+push %eax
+call __printi
 add $4, %esp
 
 # Library __exit(0), Rdummy
@@ -344,20 +363,33 @@ mov (%ebp), %esp
 pop (%ebp)
 ret
 
-# _C_foo:
+# _A_foo:
 .align 4
-_C_foo:
+_A_foo:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
+sub $8, %esp
+
+# Move 3, R0
+movl $3, -4(%ebp)
+
+# Move this, R1
+mov 0(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# MoveField R0, R1.1
+mov -8(%ebp), %ebx
+mov -4(%ebp), %eax
+movl %eax, 0(%ebx)
 
 # Return Rdummy
-jmp _C_foo_epilogue
+jmp _A_foo_epilogue
 
 # # End Of Method Block
 # End Of Method Block
 # Epilogue
-_C_foo_epilogue:
+_A_foo_epilogue:
 mov (%ebp), %esp
 pop (%ebp)
 ret

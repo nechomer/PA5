@@ -1,4 +1,4 @@
-.title "array_dereference_check_err.ic"
+.title "complex_expression_calls_check.ic"
 
 # global declarations
 .global __ic_main
@@ -15,11 +15,9 @@ str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
 str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
 	.int 32
 str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
-.int 4
-str1: .string	"roey"
-_DV_ArrDereferenceCheck: 
+_DV_C: 
 
-_DV_C:  .long _C_foo
+_DV_D:  .long _D_bar
 	
 
 .text
@@ -274,61 +272,38 @@ __ic_main:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
-sub $20, %esp
+sub $16, %esp
 
-# Move 0, arr_main
-movl $0, -4(%ebp)
-
-# Move arr_main, R2
-mov -4(%ebp), %eax
+# StaticCall _D_foo(), R3
+call _D_foo
 movl %eax, -16(%ebp)
 
-# StaticCall __checkNullRef(a=R2), Rdummy
+# StaticCall __checkNullRef(a=R3), Rdummy
 mov -16(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Move 1, R3
-movl $1, -20(%ebp)
-
-# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
+# VirtualCall R3.0(), R2
 mov -16(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# VirtualCall R1.0(), Rdummy
-mov -12(%ebp), %eax
 push %eax
 mov 0(%eax), %eax
 call *0(%eax)
+movl %eax, -12(%ebp)
 
-# Move str1, R1
-movl $str1, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
+# StaticCall __checkNullRef(a=R2), Rdummy
 mov -12(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Library __println(R1), Rdummy
-mov -12(%ebp), %eax
+# MoveField R2.1, R1
+mov -12(%ebp), %ebx
+mov 0(%ebx), %eax
+movl %eax, -8(%ebp)
+
+# Library __printi(R1), Rdummy
+mov -8(%ebp), %eax
 push %eax
-call __println
+call __printi
 add $4, %esp
 
 # Library __exit(0), Rdummy
@@ -344,20 +319,62 @@ mov (%ebp), %esp
 pop (%ebp)
 ret
 
-# _C_foo:
+# _D_foo:
 .align 4
-_C_foo:
+_D_foo:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
+sub $4, %esp
 
-# Return Rdummy
-jmp _C_foo_epilogue
+# Library __allocateObject(8), R0
+push $8
+call __allocateObject
+movl %eax, -4(%ebp)
+add $4, %esp
+
+# MoveField _DV_D, R0.0
+mov -4(%ebp), %ebx
+movl $_DV_D, (%ebx)
+
+# Return R0
+mov -4(%ebp), %eax
+jmp _D_foo_epilogue
 
 # # End Of Method Block
 # End Of Method Block
 # Epilogue
-_C_foo_epilogue:
+_D_foo_epilogue:
+mov (%ebp), %esp
+pop (%ebp)
+ret
+
+# _D_bar:
+.align 4
+_D_bar:
+# Prologue
+push (%ebp)
+mov %esp, (%ebp)
+sub $4, %esp
+
+# Library __allocateObject(8), R0
+push $8
+call __allocateObject
+movl %eax, -4(%ebp)
+add $4, %esp
+
+# MoveField _DV_D, R0.0
+mov -4(%ebp), %ebx
+movl $_DV_D, (%ebx)
+
+# Return R0
+mov -4(%ebp), %eax
+jmp _D_bar_epilogue
+
+# # End Of Method Block
+# End Of Method Block
+# Epilogue
+_D_bar_epilogue:
 mov (%ebp), %esp
 pop (%ebp)
 ret

@@ -7,7 +7,7 @@ class PrecedenceCheck {
 
 		boolean d = true;
 		boolean e = false;
-		boolean f;
+		boolean f = false;
 
 		c=a+b+c;
 		Library.printi(c);

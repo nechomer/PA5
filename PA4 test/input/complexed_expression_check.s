@@ -1,4 +1,4 @@
-.title "array_dereference_check_err.ic"
+.title "complexed_expression_check.ic"
 
 # global declarations
 .global __ic_main
@@ -15,11 +15,9 @@ str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
 str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
 	.int 32
 str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
-.int 4
-str1: .string	"roey"
-_DV_ArrDereferenceCheck: 
+_DV_A: 
 
-_DV_C:  .long _C_foo
+_DV_B:  .long _B_bar
 	
 
 .text
@@ -274,61 +272,34 @@ __ic_main:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
-sub $20, %esp
+sub $8, %esp
 
-# Move 0, arr_main
-movl $0, -4(%ebp)
+# Library __allocateObject(4), R2
+push $4
+call __allocateObject
+movl %eax, 0(%ebp)
+add $4, %esp
 
-# Move arr_main, R2
-mov -4(%ebp), %eax
-movl %eax, -16(%ebp)
+# MoveField _DV_B, R2.0
+mov 0(%ebp), %ebx
+movl $_DV_B, (%ebx)
 
 # StaticCall __checkNullRef(a=R2), Rdummy
-mov -16(%ebp), %eax
+mov 0(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Move 1, R3
-movl $1, -20(%ebp)
-
-# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
-mov -16(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# VirtualCall R1.0(), Rdummy
-mov -12(%ebp), %eax
+# VirtualCall R2.0(), R1
+mov 0(%ebp), %eax
 push %eax
 mov 0(%eax), %eax
 call *0(%eax)
+movl %eax, -8(%ebp)
 
-# Move str1, R1
-movl $str1, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Library __println(R1), Rdummy
-mov -12(%ebp), %eax
+# Library __printb(R1), Rdummy
+mov -8(%ebp), %eax
 push %eax
-call __println
+call __printb
 add $4, %esp
 
 # Library __exit(0), Rdummy
@@ -344,20 +315,70 @@ mov (%ebp), %esp
 pop (%ebp)
 ret
 
-# _C_foo:
+# _B_bar:
 .align 4
-_C_foo:
+_B_bar:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
+sub $12, %esp
 
-# Return Rdummy
-jmp _C_foo_epilogue
+# Move 0, R0
+movl $0, -4(%ebp)
+
+# Move 1, R1
+movl $1, -8(%ebp)
+
+# Move 3, R2
+movl $3, -12(%ebp)
+
+# Add R2, R1
+mov -12(%ebp), %eax
+add -8(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# Move 4, R2
+movl $4, -12(%ebp)
+
+# Compare R1, R2
+mov -12(%ebp), %eax
+cmp -8(%ebp), %eax
+
+# JumpFalse _logical_op_end_2
+jne _logical_op_end_2
+
+# Move 1, R0
+movl $1, -4(%ebp)
+
+# _logical_op_end_2:
+_logical_op_end_2:
+
+# Compare 0, R0
+mov -4(%ebp), %eax
+cmp $0, %eax
+
+# JumpTrue _logical_op_end_1
+je _logical_op_end_1
+
+# Move 0, R1
+movl $0, -8(%ebp)
+
+# And R1, R0
+mov -8(%ebp), %eax
+and -4(%ebp), %eax
+movl %eax, -4(%ebp)
+
+# _logical_op_end_1:
+_logical_op_end_1:
+
+# Return R0
+mov -4(%ebp), %eax
+jmp _B_bar_epilogue
 
 # # End Of Method Block
 # End Of Method Block
 # Epilogue
-_C_foo_epilogue:
+_B_bar_epilogue:
 mov (%ebp), %esp
 pop (%ebp)
 ret

@@ -12,9 +12,9 @@ class FieldCheck {
 }
 
 class C {
-  int f;
-  boolean b;
-  string s;
+  int f = 0;
+  boolean b = false;
+  string s = "empty str";
   C c;
 
   void foo(){

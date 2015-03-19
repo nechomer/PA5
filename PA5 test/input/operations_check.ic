@@ -2,11 +2,11 @@ class OperationsCheck {
   static void main(string[] args) {
     int a = 1;
     int b = 2;
-    int c;
+    int c = 0;
 
     boolean d = true;
     boolean e = false;
-    boolean f;
+    boolean f = false;
 
     Library.println("a,b,c are :");
     Library.printi(a);

@@ -338,6 +338,7 @@ mov -4(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -20(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -363,6 +364,7 @@ mov -12(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -20(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -388,6 +390,7 @@ mov -16(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -20(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -430,6 +433,7 @@ mov -32(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -20(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -464,6 +468,7 @@ sub $8, %esp
 movl $str1, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -8(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -496,6 +501,7 @@ sub $8, %esp
 movl $str2, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -8(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -528,6 +534,7 @@ sub $8, %esp
 movl $str3, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -8(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -560,6 +567,7 @@ sub $8, %esp
 movl $str4, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -8(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -592,6 +600,7 @@ sub $8, %esp
 movl $str5, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
+mov -8(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
@@ -616,4 +625,22 @@ labelNPE:
 push $str_err_null_ptr_ref	# error message
 call __println
 push $1		# error code
+call __exit
+
+labelABE:
+push $str_err_arr_out_of_bounds    # error message
+call __println
+push $1		  # error code
+call __exit
+
+labelASE:
+push $str_err_neg_arr_size  # error message
+call __println
+push $1       # error code
+call __exit
+
+labelDBE:
+push $str_err_div_by_zero  # error message
+call __println
+push $1       # error code
 call __exit

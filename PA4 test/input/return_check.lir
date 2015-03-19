@@ -1,7 +1,8 @@
 str_err_null_ptr_ref:		"Runtime Error: Null pointer dereference!"
-str_err_arr_out_of_bounds:	"Runtime Error: Array index out of bounds!"
-str_err_neg_arr_size:	"Runtime Error: Array allocation with negative array size!"
-str_err_div_by_zero:	"Runtime Error: Division by zero!"
+str_err_arr_out_of_bounds: 	"Runtime Error: Array index out of bounds!"
+str_err_neg_arr_size: 	"Runtime Error: Array allocation with negative array size!"
+str_err_div_by_zero: 	"Runtime Error: Division by zero!"
+# End of constant strings section
 
 # class ReturnCheck
 # Dispatch vector:
@@ -13,6 +14,7 @@ _DV_ReturnCheck: [_ReturnCheck_checkRetFuncs, _ReturnCheck_retvoid, _ReturnCheck
 _DV_C: [_C_retThis]
 # Field offsets
 
+# End of dispatch table section
 
 # Check Null Ptr Reference:
 # static void checkNullRef(array a){
@@ -23,11 +25,12 @@ _DV_C: [_C_retThis]
 __checkNullRef:
 	Move a, R0
 	Compare 0, R0
-	JumpTrue _error1
+	JumpTrue __checkNullRef_fault
 	Return Rdummy
-_error1:
-	Library __println(str_err_null_ptr_ref),Rdummy
-	Library __exit(1),Rdummy
+__checkNullRef_fault:
+	Library __println(str_err_null_ptr_ref), Rdummy
+	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Array Index Out Of Bounds:
 # static void checkArrayAccess(array a, index i) {
@@ -38,13 +41,15 @@ _error1:
 __checkArrayAccess:
 	Move i, R0
 	Compare 0, R0
-	JumpL _error2
+	JumpL __checkArrayAccess_fault
 	ArrayLength a, R0
 	Compare i, R0
-	JumpLE _error2	Return Rdummy
-_error2:
-	Library __println(str_err_arr_out_of_bounds),Rdummy
-	Library __exit(1),Rdummy
+	JumpLE __checkArrayAccess_fault
+	Return Rdummy
+__checkArrayAccess_fault:
+	Library __println(str_err_arr_out_of_bounds), Rdummy
+	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Array Allocation Is Not With Negative Number:
 # static void checkSize(size n) {
@@ -53,11 +58,12 @@ _error2:
 __checkSize:
 	Move n, R0
 	Compare 0, R0
-	JumpLE _error3
+	JumpLE __checkSize_fault
 	Return Rdummy
-_error3:
-	Library __println(str_err_neg_arr_size),Rdummy
-	Library __exit(1),Rdummy
+__checkSize_fault:
+	Library __println(str_err_neg_arr_size), Rdummy
+	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Division By Zero:
 # static void checkZero(value b) {
@@ -65,21 +71,24 @@ _error3:
 # }
 __checkZero:
 	Move b, R0
-	Compare 0, R0	JumpTrue _error4
+	Compare 0, R0
+	JumpTrue __checkZero_fault
 	Return Rdummy
-_error4:
-	Library __println(str_err_div_by_zero),Rdummy
-	Library __exit(1),Rdummy
+__checkZero_fault:
+	Library __println(str_err_div_by_zero), Rdummy
+	Library __exit(1), Rdummy
+# End Of Method Block
 
 
-_ic_main:
+__ic_main:
 Library __allocateObject(4), R0
 MoveField _DV_ReturnCheck, R0.0
-Move R0, rc
-Move rc, R1
-StaticCall __checkNullRef(a=R1),Rdummy
+Move R0, rc_main
+Move rc_main, R1
+StaticCall __checkNullRef(a=R1), Rdummy
 VirtualCall R1.0(), Rdummy
-Library __exit(0),Rdummy
+Library __exit(0), Rdummy
+# End Of Method Block
 
 _ReturnCheck_checkRetFuncs:
 Move this, R1
@@ -109,106 +118,121 @@ VirtualCall R1.12(), R0
 Move this, R1
 VirtualCall R1.13(), R0
 Return Rdummy
+# End Of Method Block
 
 _ReturnCheck_retvoid:
 Return Rdummy
 Return Rdummy
+# End Of Method Block
 
 _ReturnCheck_retvobj:
 Library __allocateObject(4), R0
 MoveField _DV_C, R0.0
-Move R0, c
-Move c, R0
+Move R0, c_main
+Move c_main, R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retArr:
 Move 2, R1
-StaticCall __checkSize(n=R1),Rdummy
+StaticCall __checkSize(n=R1), Rdummy
 Mul 4, R1
 Library __allocateArray(R1), R0
-Move R0, c
-Move c, R0
+Move R0, c_main
+Move c_main, R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retArrLocation:
 Move 0, R1
-StaticCall __checkSize(n=R1),Rdummy
+StaticCall __checkSize(n=R1), Rdummy
 Mul 4, R1
 Library __allocateArray(R1), R0
-Move R0, c
+Move R0, c_main
 Library __allocateObject(4), R0
 MoveField _DV_C, R0.0
-Move c, R1
-StaticCall __checkNullRef(a=R1),Rdummy
+Move c_main, R1
+StaticCall __checkNullRef(a=R1), Rdummy
 Move 0, R2
-StaticCall __checkArrayAccess(a=R1, i=R2),Rdummy
+StaticCall __checkArrayAccess(a=R1,i=R2), Rdummy
 MoveArray R0, R1[R2]
-Move c, R1
-StaticCall __checkNullRef(a=R1),Rdummy
+Move c_main, R1
+StaticCall __checkNullRef(a=R1), Rdummy
 Move 1, R2
-StaticCall __checkArrayAccess(a=R1, i=R2),Rdummy
+StaticCall __checkArrayAccess(a=R1,i=R2), Rdummy
 MoveArray R1[R2], R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retThis:
 Library __allocateObject(4), R1
 MoveField _DV_C, R1.0
-StaticCall __checkNullRef(a=R1),Rdummy
+StaticCall __checkNullRef(a=R1), Rdummy
 VirtualCall R1.0(), R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retNewObjThis:
 Library __allocateObject(4), R1
 MoveField _DV_C, R1.0
-StaticCall __checkNullRef(a=R1),Rdummy
+StaticCall __checkNullRef(a=R1), Rdummy
 VirtualCall R1.0(), R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retNewObj:
 Library __allocateObject(4), R0
 MoveField _DV_C, R0.0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retNewArr:
 Move 34, R1
-StaticCall __checkSize(n=R1),Rdummy
+StaticCall __checkSize(n=R1), Rdummy
 Mul 4, R1
 Library __allocateArray(R1), R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retArrLength:
 Move 2, R1
-StaticCall __checkSize(n=R1),Rdummy
+StaticCall __checkSize(n=R1), Rdummy
 Mul 4, R1
 Library __allocateArray(R1), R0
-Move R0, arr
-Move arr, R1
-StaticCall __checkNullRef(a=R1),Rdummy
+Move R0, arr_main
+Move arr_main, R1
+StaticCall __checkNullRef(a=R1), Rdummy
 ArrayLength R1, R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retNegation:
 Move 1, R0
-Move R0, a
-Move a, R0
-Xor 1,R0
+Move R0, a_main
+Move a_main, R0
+Xor 1, R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retNegative:
 Move 1, R0
-Move R0, a
-Move a, R0
+Move R0, a_main
+Move a_main, R0
 Neg R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retNull:
 Move 0, R0
 Return R0
+# End Of Method Block
 
 _ReturnCheck_retIntCalling:
 Move 6, R0
 Return R0
+# End Of Method Block
 
 _C_retThis:
 Move this, R0
 Return R0
+# End Of Method Block

@@ -1,4 +1,4 @@
-.title "arrays_check.ic"
+.title "while_check.ic"
 
 # global declarations
 .global __ic_main
@@ -15,9 +15,11 @@ str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
 str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
 	.int 32
 str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
+.int 2
+str1: .string	": "
 .int 0
-str1: .string	""
-_DV_Arrays: 
+str2: .string	""
+_DV_WhileCheck: 
 
 .text
 
@@ -271,10 +273,10 @@ __ic_main:
 # Prologue
 push (%ebp)
 mov %esp, (%ebp)
-sub $32, %esp
+sub $24, %esp
 
-# Move 5, R1
-movl $5, -12(%ebp)
+# Move 6, R1
+movl $6, -12(%ebp)
 
 # StaticCall __checkSize(n=R1), Rdummy
 mov -12(%ebp), %eax
@@ -297,15 +299,201 @@ add $4, %esp
 mov -8(%ebp), %eax
 movl %eax, -4(%ebp)
 
-# Library __allocateObject(8), R0
-push $8
-call __allocateObject
-movl %eax, -8(%ebp)
+# Move 0, R0
+movl $0, -8(%ebp)
+
+# Move R0, i_main
+mov -8(%ebp), %eax
+movl %eax, -16(%ebp)
+
+# _test_label_1:
+_test_label_1:
+
+# Move 0, R0
+movl $0, -8(%ebp)
+
+# Move i_main, R1
+mov -16(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Move arr_main, R3
+mov -4(%ebp), %eax
+movl %eax, -24(%ebp)
+
+# StaticCall __checkNullRef(a=R3), Rdummy
+mov -24(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# ArrayLength R3, R2
+mov -24(%ebp), %ebx
+mov -4(%ebx), %ebx
+movl %ebx, -20(%ebp)
+
+# Compare R1, R2
+mov -20(%ebp), %eax
+cmp -12(%ebp), %eax
+
+# JumpLE _logical_op_end_3
+jle _logical_op_end_3
+
+# Move 1, R0
+movl $1, -8(%ebp)
+
+# _logical_op_end_3:
+_logical_op_end_3:
+
+# Compare 0, R0
+mov -8(%ebp), %eax
+cmp $0, %eax
+
+# JumpTrue _end_label_2
+je _end_label_2
+
+# Move i_main, R1
+mov -16(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Library __printi(R1), Rdummy
+mov -12(%ebp), %eax
+push %eax
+call __printi
 add $4, %esp
 
-# MoveField _DV_Arrays, R0.0
-mov -8(%ebp), %ebx
-movl $_DV_Arrays, (%ebx)
+# Move str1, R1
+movl $str1, -12(%ebp)
+
+# StaticCall __checkNullRef(a=R1), Rdummy
+mov -12(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Library __print(R1), Rdummy
+mov -12(%ebp), %eax
+push %eax
+call __print
+add $4, %esp
+
+# Move arr_main, R2
+mov -4(%ebp), %eax
+movl %eax, -20(%ebp)
+
+# StaticCall __checkNullRef(a=R2), Rdummy
+mov -20(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Move i_main, R3
+mov -16(%ebp), %eax
+movl %eax, -24(%ebp)
+
+# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
+mov -24(%ebp), %ecx
+mov -20(%ebp), %eax
+mov -4(%eax),%edx  # edx = length
+cmp %ecx,%edx
+jle labelABE       # edx <= ecx ?
+cmp $0,%ecx
+jl  labelABE       # ecx < 0 ?
+
+# MoveArray R2[R3], R1
+mov -20(%ebp), %eax
+mov -24(%ebp), %ecx
+mov (%eax, %ecx, 4), %ebx
+movl %ebx, -12(%ebp)
+
+# Library __printi(R1), Rdummy
+mov -12(%ebp), %eax
+push %eax
+call __printi
+add $4, %esp
+
+# Move str2, R1
+movl $str2, -12(%ebp)
+
+# StaticCall __checkNullRef(a=R1), Rdummy
+mov -12(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Library __println(R1), Rdummy
+mov -12(%ebp), %eax
+push %eax
+call __println
+add $4, %esp
+
+# Move i_main, R0
+mov -16(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# Move 1, R1
+movl $1, -12(%ebp)
+
+# Add R1, R0
+mov -12(%ebp), %eax
+add -8(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# Move R0, i_main
+mov -8(%ebp), %eax
+movl %eax, -16(%ebp)
+
+# Jump _test_label_1
+jmp _test_label_1
+
+# _end_label_2:
+_end_label_2:
+
+# Move 0, R0
+movl $0, -8(%ebp)
+
+# Move R0, i_main
+mov -8(%ebp), %eax
+movl %eax, -16(%ebp)
+
+# _test_label_4:
+_test_label_4:
+
+# Move 0, R0
+movl $0, -8(%ebp)
+
+# Move i_main, R1
+mov -16(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Move arr_main, R3
+mov -4(%ebp), %eax
+movl %eax, -24(%ebp)
+
+# StaticCall __checkNullRef(a=R3), Rdummy
+mov -24(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# ArrayLength R3, R2
+mov -24(%ebp), %ebx
+mov -4(%ebx), %ebx
+movl %ebx, -20(%ebp)
+
+# Compare R1, R2
+mov -20(%ebp), %eax
+cmp -12(%ebp), %eax
+
+# JumpLE _logical_op_end_6
+jle _logical_op_end_6
+
+# Move 1, R0
+movl $1, -8(%ebp)
+
+# _logical_op_end_6:
+_logical_op_end_6:
+
+# Compare 0, R0
+mov -8(%ebp), %eax
+cmp $0, %eax
+
+# JumpTrue _end_label_5
+je _end_label_5
 
 # Move arr_main, R1
 mov -4(%ebp), %eax
@@ -316,11 +504,35 @@ mov -12(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Move 0, R2
-movl $0, -16(%ebp)
+# ArrayLength R1, R0
+mov -12(%ebp), %ebx
+mov -4(%ebx), %ebx
+movl %ebx, -8(%ebp)
+
+# Move i_main, R1
+mov -16(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Sub R1, R0
+mov -8(%ebp), %eax
+sub -12(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# Move arr_main, R1
+mov -4(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# StaticCall __checkNullRef(a=R1), Rdummy
+mov -12(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Move i_main, R2
+mov -16(%ebp), %eax
+movl %eax, -20(%ebp)
 
 # StaticCall __checkArrayAccess(a=R1,i=R2), Rdummy
-mov -16(%ebp), %ecx
+mov -20(%ebp), %ecx
 mov -12(%ebp), %eax
 mov -4(%eax),%edx  # edx = length
 cmp %ecx,%edx
@@ -330,85 +542,85 @@ jl  labelABE       # ecx < 0 ?
 
 # MoveArray R0, R1[R2]
 mov -12(%ebp), %eax
-mov -16(%ebp), %ecx
+mov -20(%ebp), %ecx
 mov -8(%ebp), %ebx
 movl %ebx, (%eax, %ecx, 4)
 
-# Move 5, R0
-movl $5, -8(%ebp)
+# Move i_main, R0
+mov -16(%ebp), %eax
+movl %eax, -8(%ebp)
 
-# Move arr_main, R2
-mov -4(%ebp), %eax
+# Move 1, R1
+movl $1, -12(%ebp)
+
+# Add R1, R0
+mov -12(%ebp), %eax
+add -8(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# Move R0, i_main
+mov -8(%ebp), %eax
 movl %eax, -16(%ebp)
 
-# StaticCall __checkNullRef(a=R2), Rdummy
-mov -16(%ebp), %eax
-cmp $0, %eax
-je labelNPE
+# Jump _test_label_4
+jmp _test_label_4
 
-# Move 0, R3
-movl $0, -20(%ebp)
+# _end_label_5:
+_end_label_5:
 
-# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
-mov -16(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
+# Move 0, R0
+movl $0, -8(%ebp)
 
-# MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# MoveField R0, R1.1
-mov -12(%ebp), %ebx
+# Move R0, i_main
 mov -8(%ebp), %eax
-movl %eax, 0(%ebx)
+movl %eax, -16(%ebp)
+
+# _test_label_7:
+_test_label_7:
+
+# Move 0, R0
+movl $0, -8(%ebp)
+
+# Move i_main, R1
+mov -16(%ebp), %eax
+movl %eax, -12(%ebp)
 
 # Move arr_main, R3
 mov -4(%ebp), %eax
-movl %eax, -20(%ebp)
+movl %eax, -24(%ebp)
 
 # StaticCall __checkNullRef(a=R3), Rdummy
-mov -20(%ebp), %eax
+mov -24(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Move 0, R4
-movl $0, -24(%ebp)
+# ArrayLength R3, R2
+mov -24(%ebp), %ebx
+mov -4(%ebx), %ebx
+movl %ebx, -20(%ebp)
 
-# StaticCall __checkArrayAccess(a=R3,i=R4), Rdummy
-mov -24(%ebp), %ecx
+# Compare R1, R2
 mov -20(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
+cmp -12(%ebp), %eax
 
-# MoveArray R3[R4], R2
-mov -20(%ebp), %eax
-mov -24(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -16(%ebp)
+# JumpLE _logical_op_end_9
+jle _logical_op_end_9
 
-# StaticCall __checkNullRef(a=R2), Rdummy
+# Move 1, R0
+movl $1, -8(%ebp)
+
+# _logical_op_end_9:
+_logical_op_end_9:
+
+# Compare 0, R0
+mov -8(%ebp), %eax
+cmp $0, %eax
+
+# JumpTrue _end_label_8
+je _end_label_8
+
+# Move i_main, R1
 mov -16(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# MoveField R2.1, R1
-mov -16(%ebp), %ebx
-mov 0(%ebx), %eax
 movl %eax, -12(%ebp)
 
 # Library __printi(R1), Rdummy
@@ -425,278 +637,28 @@ mov -12(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Library __println(R1), Rdummy
+# Library __print(R1), Rdummy
 mov -12(%ebp), %eax
 push %eax
-call __println
+call __print
 add $4, %esp
 
-# Move 0, integerarr_main
-movl $0, -28(%ebp)
-
-# Move 2, R1
-movl $2, -12(%ebp)
-
-# StaticCall __checkSize(n=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0,%eax		# eax == array size
-jle labelASE    # eax <= 0 ?
-
-# Mul 4, R1
-mov -12(%ebp), %eax
-imul $4, %eax
-movl %eax, -12(%ebp)
-
-# Library __allocateArray(R1), R0
-mov -12(%ebp), %eax
-push %eax
-call __allocateArray
-movl %eax, -8(%ebp)
-add $4, %esp
-
-# Move R0, integerarr_main
-mov -8(%ebp), %eax
-movl %eax, -28(%ebp)
-
-# Move 39, R0
-movl $39, -8(%ebp)
-
-# Move integerarr_main, R1
-mov -28(%ebp), %eax
-movl %eax, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Move 1, R2
-movl $1, -16(%ebp)
-
-# StaticCall __checkArrayAccess(a=R1,i=R2), Rdummy
-mov -16(%ebp), %ecx
-mov -12(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R0, R1[R2]
-mov -12(%ebp), %eax
-mov -16(%ebp), %ecx
-mov -8(%ebp), %ebx
-movl %ebx, (%eax, %ecx, 4)
-
-# Move integerarr_main, R2
-mov -28(%ebp), %eax
-movl %eax, -16(%ebp)
-
-# StaticCall __checkNullRef(a=R2), Rdummy
-mov -16(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Move 1, R3
-movl $1, -20(%ebp)
-
-# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
-mov -16(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -12(%ebp)
-
-# Library __printi(R1), Rdummy
-mov -12(%ebp), %eax
-push %eax
-call __printi
-add $4, %esp
-
-# Move str1, R1
-movl $str1, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Library __println(R1), Rdummy
-mov -12(%ebp), %eax
-push %eax
-call __println
-add $4, %esp
-
-# Move 3, R1
-movl $3, -12(%ebp)
-
-# StaticCall __checkSize(n=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0,%eax		# eax == array size
-jle labelASE    # eax <= 0 ?
-
-# Mul 4, R1
-mov -12(%ebp), %eax
-imul $4, %eax
-movl %eax, -12(%ebp)
-
-# Library __allocateArray(R1), R0
-mov -12(%ebp), %eax
-push %eax
-call __allocateArray
-movl %eax, -8(%ebp)
-add $4, %esp
-
-# Move R0, doublearr_main
-mov -8(%ebp), %eax
-movl %eax, -32(%ebp)
-
-# Move 5, R1
-movl $5, -12(%ebp)
-
-# StaticCall __checkSize(n=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0,%eax		# eax == array size
-jle labelASE    # eax <= 0 ?
-
-# Mul 4, R1
-mov -12(%ebp), %eax
-imul $4, %eax
-movl %eax, -12(%ebp)
-
-# Library __allocateArray(R1), R0
-mov -12(%ebp), %eax
-push %eax
-call __allocateArray
-movl %eax, -8(%ebp)
-add $4, %esp
-
-# Move doublearr_main, R1
-mov -32(%ebp), %eax
-movl %eax, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Move 0, R2
-movl $0, -16(%ebp)
-
-# StaticCall __checkArrayAccess(a=R1,i=R2), Rdummy
-mov -16(%ebp), %ecx
-mov -12(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R0, R1[R2]
-mov -12(%ebp), %eax
-mov -16(%ebp), %ecx
-mov -8(%ebp), %ebx
-movl %ebx, (%eax, %ecx, 4)
-
-# Move 3, R0
-movl $3, -8(%ebp)
-
-# Move doublearr_main, R2
-mov -32(%ebp), %eax
-movl %eax, -16(%ebp)
-
-# StaticCall __checkNullRef(a=R2), Rdummy
-mov -16(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Move 0, R3
-movl $0, -20(%ebp)
-
-# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
-mov -16(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -12(%ebp)
-
-# StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Move 0, R2
-movl $0, -16(%ebp)
-
-# StaticCall __checkArrayAccess(a=R1,i=R2), Rdummy
-mov -16(%ebp), %ecx
-mov -12(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R0, R1[R2]
-mov -12(%ebp), %eax
-mov -16(%ebp), %ecx
-mov -8(%ebp), %ebx
-movl %ebx, (%eax, %ecx, 4)
-
-# Move doublearr_main, R3
-mov -32(%ebp), %eax
+# Move arr_main, R2
+mov -4(%ebp), %eax
 movl %eax, -20(%ebp)
 
-# StaticCall __checkNullRef(a=R3), Rdummy
-mov -20(%ebp), %eax
-cmp $0, %eax
-je labelNPE
-
-# Move 0, R4
-movl $0, -24(%ebp)
-
-# StaticCall __checkArrayAccess(a=R3,i=R4), Rdummy
-mov -24(%ebp), %ecx
-mov -20(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
-
-# MoveArray R3[R4], R2
-mov -20(%ebp), %eax
-mov -24(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -16(%ebp)
-
 # StaticCall __checkNullRef(a=R2), Rdummy
-mov -16(%ebp), %eax
+mov -20(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
-# Move 0, R3
-movl $0, -20(%ebp)
+# Move i_main, R3
+mov -16(%ebp), %eax
+movl %eax, -24(%ebp)
 
 # StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
-mov -16(%ebp), %eax
+mov -24(%ebp), %ecx
+mov -20(%ebp), %eax
 mov -4(%eax),%edx  # edx = length
 cmp %ecx,%edx
 jle labelABE       # edx <= ecx ?
@@ -704,8 +666,8 @@ cmp $0,%ecx
 jl  labelABE       # ecx < 0 ?
 
 # MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
+mov -20(%ebp), %eax
+mov -24(%ebp), %ecx
 mov (%eax, %ecx, 4), %ebx
 movl %ebx, -12(%ebp)
 
@@ -714,6 +676,42 @@ mov -12(%ebp), %eax
 push %eax
 call __printi
 add $4, %esp
+
+# Move str2, R1
+movl $str2, -12(%ebp)
+
+# StaticCall __checkNullRef(a=R1), Rdummy
+mov -12(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Library __println(R1), Rdummy
+mov -12(%ebp), %eax
+push %eax
+call __println
+add $4, %esp
+
+# Move i_main, R0
+mov -16(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# Move 1, R1
+movl $1, -12(%ebp)
+
+# Add R1, R0
+mov -12(%ebp), %eax
+add -8(%ebp), %eax
+movl %eax, -8(%ebp)
+
+# Move R0, i_main
+mov -8(%ebp), %eax
+movl %eax, -16(%ebp)
+
+# Jump _test_label_7
+jmp _test_label_7
+
+# _end_label_8:
+_end_label_8:
 
 # Library __exit(0), Rdummy
 push $0

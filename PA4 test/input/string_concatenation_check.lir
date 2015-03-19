@@ -26,11 +26,12 @@ _DV_StringConcatenation: []
 __checkNullRef:
 	Move a, R0
 	Compare 0, R0
-	JumpTrue _error1
+	JumpTrue __checkNullRef_fault
 	Return Rdummy
-_error1:
+__checkNullRef_fault:
 	Library __println(str_err_null_ptr_ref), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Array Index Out Of Bounds:
 # static void checkArrayAccess(array a, index i) {
@@ -41,14 +42,15 @@ _error1:
 __checkArrayAccess:
 	Move i, R0
 	Compare 0, R0
-	JumpL _error2
+	JumpL __checkArrayAccess_fault
 	ArrayLength a, R0
 	Compare i, R0
-	JumpLE _error2
+	JumpLE __checkArrayAccess_fault
 	Return Rdummy
-_error2:
+__checkArrayAccess_fault:
 	Library __println(str_err_arr_out_of_bounds), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Array Allocation Is Not With Negative Number:
 # static void checkSize(size n) {
@@ -57,11 +59,12 @@ _error2:
 __checkSize:
 	Move n, R0
 	Compare 0, R0
-	JumpLE _error3
+	JumpLE __checkSize_fault
 	Return Rdummy
-_error3:
+__checkSize_fault:
 	Library __println(str_err_neg_arr_size), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 # Check Division By Zero:
 # static void checkZero(value b) {
@@ -70,14 +73,15 @@ _error3:
 __checkZero:
 	Move b, R0
 	Compare 0, R0
-	JumpTrue _error4
+	JumpTrue __checkZero_fault
 	Return Rdummy
-_error4:
+__checkZero_fault:
 	Library __println(str_err_div_by_zero), Rdummy
 	Library __exit(1), Rdummy
+# End Of Method Block
 
 
-_ic_main:
+__ic_main:
 Move str1, R0
 Move str2, R1
 StaticCall __checkNullRef(a=R0), Rdummy

@@ -20,7 +20,7 @@ class B {
 	static int foo() {
 
 		int a = 1;
-		int b;
+		int b = 0;
 		int c;
 
 		c = a;

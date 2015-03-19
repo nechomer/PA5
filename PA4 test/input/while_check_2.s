@@ -1,4 +1,4 @@
-.title "array_dereference_check_err.ic"
+.title "while_check_2.ic"
 
 # global declarations
 .global __ic_main
@@ -15,12 +15,13 @@ str_err_arr_out_of_bounds: .string	"Runtime Error: Array index out of bounds!"
 str_err_neg_arr_size: .string	"Runtime Error: Array allocation with negative array size!"
 	.int 32
 str_err_div_by_zero: .string	"Runtime Error: Division by zero!"
-.int 4
-str1: .string	"roey"
-_DV_ArrDereferenceCheck: 
-
-_DV_C:  .long _C_foo
-	
+.int 5
+str1: .string	"i is "
+.int 0
+str2: .string	""
+.int 5
+str3: .string	"j is "
+_DV_A: 
 
 .text
 
@@ -276,60 +277,242 @@ push (%ebp)
 mov %esp, (%ebp)
 sub $20, %esp
 
-# Move 0, arr_main
+# Move 0, i_main
 movl $0, -4(%ebp)
 
-# Move arr_main, R2
+# Move 0, j_main
+movl $0, -8(%ebp)
+
+# _test_label_1:
+_test_label_1:
+
+# Move 0, R0
+movl $0, -12(%ebp)
+
+# Move 1, R1
+movl $1, -16(%ebp)
+
+# Move 2, R2
+movl $2, -20(%ebp)
+
+# Compare R1, R2
+mov -20(%ebp), %eax
+cmp -16(%ebp), %eax
+
+# JumpLE _logical_op_end_3
+jle _logical_op_end_3
+
+# Move 1, R0
+movl $1, -12(%ebp)
+
+# _logical_op_end_3:
+_logical_op_end_3:
+
+# Compare 0, R0
+mov -12(%ebp), %eax
+cmp $0, %eax
+
+# JumpTrue _end_label_2
+je _end_label_2
+
+# Jump _end_label_2
+jmp _end_label_2
+
+# Jump _test_label_1
+jmp _test_label_1
+
+# _end_label_2:
+_end_label_2:
+
+# _test_label_4:
+_test_label_4:
+
+# Move 0, R0
+movl $0, -12(%ebp)
+
+# Move i_main, R1
 mov -4(%ebp), %eax
 movl %eax, -16(%ebp)
 
-# StaticCall __checkNullRef(a=R2), Rdummy
-mov -16(%ebp), %eax
-cmp $0, %eax
-je labelNPE
+# Move 3, R2
+movl $3, -20(%ebp)
 
-# Move 1, R3
-movl $1, -20(%ebp)
+# Compare R1, R2
+mov -20(%ebp), %eax
+cmp -16(%ebp), %eax
 
-# StaticCall __checkArrayAccess(a=R2,i=R3), Rdummy
-mov -20(%ebp), %ecx
-mov -16(%ebp), %eax
-mov -4(%eax),%edx  # edx = length
-cmp %ecx,%edx
-jle labelABE       # edx <= ecx ?
-cmp $0,%ecx
-jl  labelABE       # ecx < 0 ?
+# JumpLE _logical_op_end_6
+jle _logical_op_end_6
 
-# MoveArray R2[R3], R1
-mov -16(%ebp), %eax
-mov -20(%ebp), %ecx
-mov (%eax, %ecx, 4), %ebx
-movl %ebx, -12(%ebp)
+# Move 1, R0
+movl $1, -12(%ebp)
 
-# StaticCall __checkNullRef(a=R1), Rdummy
+# _logical_op_end_6:
+_logical_op_end_6:
+
+# Compare 0, R0
 mov -12(%ebp), %eax
 cmp $0, %eax
-je labelNPE
 
-# VirtualCall R1.0(), Rdummy
+# JumpTrue _end_label_5
+je _end_label_5
+
+# Move 0, R0
+movl $0, -12(%ebp)
+
+# Move R0, j_main
 mov -12(%ebp), %eax
-push %eax
-mov 0(%eax), %eax
-call *0(%eax)
+movl %eax, -8(%ebp)
+
+# _test_label_7:
+_test_label_7:
+
+# Move 0, R0
+movl $0, -12(%ebp)
+
+# Move j_main, R1
+mov -8(%ebp), %eax
+movl %eax, -16(%ebp)
+
+# Move 2, R2
+movl $2, -20(%ebp)
+
+# Compare R1, R2
+mov -20(%ebp), %eax
+cmp -16(%ebp), %eax
+
+# JumpLE _logical_op_end_9
+jle _logical_op_end_9
+
+# Move 1, R0
+movl $1, -12(%ebp)
+
+# _logical_op_end_9:
+_logical_op_end_9:
+
+# Compare 0, R0
+mov -12(%ebp), %eax
+cmp $0, %eax
+
+# JumpTrue _end_label_8
+je _end_label_8
+
+# Move j__statement block in main_main, R0
+movl $j__statement, 0(%ebp)
+
+# Move 1, R1
+movl $1, -16(%ebp)
+
+# Add R1, R0
+mov -16(%ebp), %eax
+add -12(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Move R0, j__statement block in main_main
+mov -12(%ebp), %eax
+movl %eax, 0(%ebp)
 
 # Move str1, R1
-movl $str1, -12(%ebp)
+movl $str1, -16(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -12(%ebp), %eax
+mov -16(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Library __print(R1), Rdummy
+mov -16(%ebp), %eax
+push %eax
+call __print
+add $4, %esp
+
+# Move i__statement block in main_main, R1
+movl $i__statement, 0(%ebp)
+
+# Library __printi(R1), Rdummy
+mov -16(%ebp), %eax
+push %eax
+call __printi
+add $4, %esp
+
+# Move str2, R1
+movl $str2, -16(%ebp)
+
+# StaticCall __checkNullRef(a=R1), Rdummy
+mov -16(%ebp), %eax
 cmp $0, %eax
 je labelNPE
 
 # Library __println(R1), Rdummy
-mov -12(%ebp), %eax
+mov -16(%ebp), %eax
 push %eax
 call __println
 add $4, %esp
+
+# Move str3, R1
+movl $str3, -16(%ebp)
+
+# StaticCall __checkNullRef(a=R1), Rdummy
+mov -16(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Library __print(R1), Rdummy
+mov -16(%ebp), %eax
+push %eax
+call __print
+add $4, %esp
+
+# Move j__statement block in main_main, R1
+movl $j__statement, 0(%ebp)
+
+# Library __printi(R1), Rdummy
+mov -16(%ebp), %eax
+push %eax
+call __printi
+add $4, %esp
+
+# Move str2, R1
+movl $str2, -16(%ebp)
+
+# StaticCall __checkNullRef(a=R1), Rdummy
+mov -16(%ebp), %eax
+cmp $0, %eax
+je labelNPE
+
+# Library __println(R1), Rdummy
+mov -16(%ebp), %eax
+push %eax
+call __println
+add $4, %esp
+
+# Jump _test_label_7
+jmp _test_label_7
+
+# _end_label_8:
+_end_label_8:
+
+# Move i_main, R0
+mov -4(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Move 1, R1
+movl $1, -16(%ebp)
+
+# Add R1, R0
+mov -16(%ebp), %eax
+add -12(%ebp), %eax
+movl %eax, -12(%ebp)
+
+# Move R0, i_main
+mov -12(%ebp), %eax
+movl %eax, -4(%ebp)
+
+# Jump _test_label_4
+jmp _test_label_4
+
+# _end_label_5:
+_end_label_5:
 
 # Library __exit(0), Rdummy
 push $0
@@ -340,24 +523,6 @@ add $4, %esp
 # End Of Method Block
 # Epilogue
 __ic_main_epilogue:
-mov (%ebp), %esp
-pop (%ebp)
-ret
-
-# _C_foo:
-.align 4
-_C_foo:
-# Prologue
-push (%ebp)
-mov %esp, (%ebp)
-
-# Return Rdummy
-jmp _C_foo_epilogue
-
-# # End Of Method Block
-# End Of Method Block
-# Epilogue
-_C_foo_epilogue:
 mov (%ebp), %esp
 pop (%ebp)
 ret
