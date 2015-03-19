@@ -818,7 +818,7 @@ public class LirTranslator implements Visitor {
 		String secReg = getNextReg();
 		
 		// Do actual operation and save the result in the 1st register
-		binaryLir += binaryOp.getOperator().getLirOp() + " " + secReg + "," + firstReg + "\n";
+		binaryLir += binaryOp.getOperator().getLirOp() + " " + secReg + ", " + firstReg + "\n";
 		
 		binaryLir += testEnd + ":\n"; // add a point to jump to in case of lazy eval.
 
@@ -856,7 +856,7 @@ public class LirTranslator implements Visitor {
 		String reg = getNextReg();
 		String lir = "" + unaryOp.getOperand().accept(this);
 				
-		lir += "Xor 1," + reg  + "\n";
+		lir += "Xor 1, " + reg  + "\n";
 		
 		return lir;
 	}
