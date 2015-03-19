@@ -453,12 +453,21 @@ public class AsmTranslator {
 					firstToken = formatStr(tokenizer.nextToken());
 					secondToken = tokenizer.nextToken();
 					String funcName = getFuncFromCall(firstToken);
+					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
 					if (funcName.equals("__checkNullRef")) {
+						makeVarForErrorCheck(CurrMethod, funcName, paramMap);
 						makeCheckNullRef();
-					} else {
-						Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
-
-
+					} 	else if (funcName.equals("__checkArrayAccess")) {
+						makeVarForErrorCheck(CurrMethod, funcName, paramMap);
+						makeCheckArrayAccess();
+					} 	else if (funcName.equals("__checkSize")) {
+						makeVarForErrorCheck(CurrMethod, funcName, paramMap);
+						makeArrIdxCheck();
+					} 	else if (funcName.equals("__checkZero")) {
+						makeVarForErrorCheck(CurrMethod, funcName, paramMap);
+						makeZeroDivCheck();
+					}	else {
+						
 						if(paramMap != null)
 							pushVars(CurrMethod, funcName, paramMap);
 
@@ -539,6 +548,20 @@ public class AsmTranslator {
 	}
 
 
+	private void makeVarForErrorCheck(String fromFunction, String toFunction, Map<String,String> paramsToRegs) {
+		List<String> params = ml.getParamsReverseList(toFunction);
+        int regOffset = 0;
+        if (params.size() == 1) {
+        	regOffset = ml.getOffset(fromFunction, paramsToRegs.get(params.get(0)));
+            emit("mov " + regOffset + "(%ebp), %eax");
+        } 
+        if (params.size() == 2){
+        	regOffset = ml.getOffset(fromFunction, paramsToRegs.get(params.get(0)));
+            emit("mov " + regOffset + "(%ebp), %ecx");
+            regOffset = ml.getOffset(fromFunction, paramsToRegs.get(params.get(1)));
+            emit("mov " + regOffset + "(%ebp), %eax");
+        }
+	}
 	private void pushVars(String fromFunction, String toFunction, Map<String,String> paramsToRegs) {
        
     	List<String> params = ml.getParamsReverseList(toFunction);
@@ -690,6 +713,44 @@ public class AsmTranslator {
 		emit("call __println");
 		emit("push $1		# error code");
 		emit("call __exit");
+		emit("");
+		emit("labelABE:");
+		emit("push $str_err_arr_out_of_bounds    # error message");
+		emit("call __println");
+		emit("push $1		  # error code");
+		emit("call __exit");
+		
+		emit("");
+		emit("labelASE:");
+		emit("push $str_err_neg_arr_size  # error message");
+		emit("call __println");
+		emit("push $1       # error code");
+		emit("call __exit");
+		
+		emit("");
+		emit("labelDBE:");
+    	emit("push $strDBE  # error message");
+    	emit("call __println");
+    	emit("push $1       # error code");
+    	emit("call __exit");
 	}
+    
+    private void makeCheckArrayAccess() {
+    	emit("mov -4(%eax),%edx  # edx = length");
+    	emit("cmp %ecx,%edx");
+    	emit("jle labelABE       # edx <= ecx ?");
+    	emit("cmp $0,%ecx");
+    	emit("jl  labelABE       # ecx < 0 ?");
+    }
+    
+    private void makeArrIdxCheck() {
+    	emit("cmp $0,%eax		# eax == array size");
+    	emit("jle labelASE    # eax <= 0 ?");
+    }
+    
+    private void makeZeroDivCheck() {
+    	emit("cmp $0,%eax	# eax is divisor");
+    	emit("je labelDBE     # eax == 0 ?");
+    }
     
 }
