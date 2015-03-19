@@ -145,7 +145,7 @@ public class AsmTranslator {
 						emit(CurrMethod + ":");
 						makePrologue(CurrMethod);
 					} else{
-
+						emit(line);
 					}
 					continue;
 				}

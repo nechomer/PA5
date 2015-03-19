@@ -929,9 +929,9 @@ public class LirTranslator implements Visitor {
 	"__checkNullRef:\n" +
 	"	Move a, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpTrue _checkNullRef_fault\n" +
+	"	JumpTrue __checkNullRef_fault\n" +
 	"	Return Rdummy\n" +
-	"_checkNullRef_fault:\n" +
+	"__checkNullRef_fault:\n" +
 	"	Library __println(str_err_null_ptr_ref), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" +
 	"# End Of Method Block\n" +
@@ -950,12 +950,12 @@ public class LirTranslator implements Visitor {
 	"__checkArrayAccess:\n" +
 	"	Move i, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpL _checkArrayAccess_fault\n" +
+	"	JumpL __checkArrayAccess_fault\n" +
 	"	ArrayLength a, R0\n" +
 	"	Compare i, R0\n" +
-	"	JumpLE _checkArrayAccess_fault\n" +
+	"	JumpLE __checkArrayAccess_fault\n" +
 	"	Return Rdummy\n" +
-	"_checkArrayAccess_fault:\n" +
+	"__checkArrayAccess_fault:\n" +
 	"	Library __println(str_err_arr_out_of_bounds), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"# End Of Method Block\n" +
@@ -972,9 +972,9 @@ public class LirTranslator implements Visitor {
 	"__checkSize:\n" +
 	"	Move n, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpLE _checkSize_fault\n" +
+	"	JumpLE __checkSize_fault\n" +
 	"	Return Rdummy\n" +
-	"_checkSize_fault:\n" +
+	"__checkSize_fault:\n" +
 	"	Library __println(str_err_neg_arr_size), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"# End Of Method Block\n" +
@@ -991,9 +991,9 @@ public class LirTranslator implements Visitor {
 	"__checkZero:\n" +
 	"	Move b, R0\n" +
 	"	Compare 0, R0\n" +
-	"	JumpTrue _checkZero_fault\n" +
+	"	JumpTrue __checkZero_fault\n" +
 	"	Return Rdummy\n" +
-	"_checkZero_fault:\n" +
+	"__checkZero_fault:\n" +
 	"	Library __println(str_err_div_by_zero), Rdummy\n" +
 	"	Library __exit(1), Rdummy\n" + 
 	"# End Of Method Block\n" +
