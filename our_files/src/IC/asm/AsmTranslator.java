@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -353,7 +355,7 @@ public class AsmTranslator {
 				
 				else if(lirOp.equals("Xor")){
 					
-					firstToken = tokenizer.nextToken();
+					firstToken = formatStr(tokenizer.nextToken());
 					secondOffset = ml.getOffset(CurrMethod,formatStr(tokenizer.nextToken()));
 			        emit("mov " + "$"+ firstToken + ", %eax");
 			        emit("xor " + secondOffset + "(%ebp), %eax");
@@ -423,7 +425,11 @@ public class AsmTranslator {
 					secondToken = tokenizer.nextToken();
 					String[] regs = getRegsFromLibCall(getParamsFromCall(firstToken));
 					int regOffset = 0;
-					
+					if(funcName.equals("__stringCat")) {
+						List<String> tempList = Arrays.asList(regs);
+						Collections.reverse(tempList);
+						regs = (String[]) tempList.toArray();
+					}
 					for(String reg:regs){
 						if(reg.startsWith("R")){
 				            regOffset = ml.getOffset(CurrMethod, reg);
