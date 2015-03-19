@@ -9,6 +9,10 @@ from subprocess import *
 ProgFileList = glob("input/*.lir")
 for Progfile in ProgFileList:
 	os.remove(Progfile)
+
+ProgFileList = glob("input/*.s")
+for Progfile in ProgFileList:
+	os.remove(Progfile)
 	
 # ProgFileList = glob("inputref/*.lir")
 # for Progfile in ProgFileList:
