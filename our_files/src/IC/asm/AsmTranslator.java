@@ -82,13 +82,15 @@ public class AsmTranslator {
 			while ((line = bufReader.readLine()) != null) {
 				
 				if (line.startsWith("_")) {
+					if(!lablesMap.containsKey(line.substring(0, line.length()-1)))
 					lablesMap.put(line.substring(0, line.length()-1), false);
 				}
 				
-				if (line.startsWith("jump")) {
+				if (line.startsWith("\tJump") || line.startsWith("Jump")) {
 					
 					String[] jumpLine = line.split(" ");
-					String jumpLabel = jumpLine[1].substring(0, jumpLine[1].length()-1);
+					String jumpLabel = jumpLine[1].substring(0, jumpLine[1].length());
+					System.out.println("jump label = " + jumpLabel);
 					lablesMap.put(jumpLabel, true);
 				}
 
@@ -378,7 +380,7 @@ public class AsmTranslator {
 					emit("jmp" + " " + firstToken);
 					
 				}
-				else if(lirOp.equals("JumpTure")){
+				else if(lirOp.equals("JumpTrue")){
 					
 					firstToken = tokenizer.nextToken();
 					emit("je" + " " + firstToken);
