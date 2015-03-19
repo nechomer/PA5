@@ -1,0 +1,17 @@
+Parsed -LLibrary/libic.sig successfully!
+Parsed array_dereference_check_err.ic successfully!
+jump label = __checkNullRef_fault
+jump label = __checkArrayAccess_fault
+jump label = __checkArrayAccess_fault
+jump label = __checkSize_fault
+jump label = __checkZero_fault
+__checkNullRef
+__checkNullRef_fault
+__checkArrayAccess
+__checkArrayAccess_fault
+__checkSize
+__checkSize_fault
+__checkZero
+__checkZero_fault
+__ic_main
+_C_foo

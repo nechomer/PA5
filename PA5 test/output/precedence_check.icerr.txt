@@ -1,0 +1,34 @@
+Parsed -LLibrary/libic.sig successfully!
+Parsed precedence_check.ic successfully!
+jump label = __checkNullRef_fault
+jump label = __checkArrayAccess_fault
+jump label = __checkArrayAccess_fault
+jump label = __checkSize_fault
+jump label = __checkZero_fault
+jump label = _logical_op_end_2
+jump label = _logical_op_end_1
+jump label = _logical_op_end_4
+jump label = _logical_op_end_3
+jump label = _logical_op_end_6
+jump label = _logical_op_end_5
+jump label = _logical_op_end_7
+jump label = _logical_op_end_9
+jump label = _logical_op_end_8
+__checkNullRef
+__checkNullRef_fault
+__checkArrayAccess
+__checkArrayAccess_fault
+__checkSize
+__checkSize_fault
+__checkZero
+__checkZero_fault
+__ic_main
+_logical_op_end_2
+_logical_op_end_1
+_logical_op_end_4
+_logical_op_end_3
+_logical_op_end_6
+_logical_op_end_7
+_logical_op_end_5
+_logical_op_end_9
+_logical_op_end_8
