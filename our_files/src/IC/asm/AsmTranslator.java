@@ -23,6 +23,7 @@ public class AsmTranslator {
 	private String dts;
 	private MethodLayouts ml;
 	private Map<String,Boolean> lablesMap; // Contains labels, if method label than value = false
+	private Map<String, String> regToDVPtr;
 	
 	public AsmTranslator(String lirFileName, String lirStr, String dispatchTableString, MethodLayouts ml) {
 		this.lirFileName = lirFileName;
@@ -30,6 +31,7 @@ public class AsmTranslator {
 		this.dts = dispatchTableString;
 		this.ml = ml;
 		this.lablesMap = new HashMap<String,Boolean>();
+		this.regToDVPtr = new HashMap<String, String>();
 		this.sb = new StringBuilder();
 	}
 	
@@ -151,7 +153,9 @@ public class AsmTranslator {
 				if(lirOp.equals("Move")){
 					
 					firstToken = formatStr(tokenizer.nextToken());
-					secondOffset = ml.getOffset(CurrMethod, tokenizer.nextToken());
+					secondToken = tokenizer.nextToken();
+					updateRegs(firstToken, secondToken);
+					secondOffset = ml.getOffset(CurrMethod, secondToken);
 					
 					if (!isMem(firstToken) && ml.getOffset(CurrMethod, firstToken) == 0) {
 						
@@ -198,6 +202,7 @@ public class AsmTranslator {
 					
 					firstToken = formatStr(tokenizer.nextToken());
 					secondToken = tokenizer.nextToken();
+					updateRegs(firstToken, secondToken);
 					String[] regs= new String[2];
 					boolean isLoad = isLoadField(firstToken);
 					if(isLoad)
@@ -288,12 +293,7 @@ public class AsmTranslator {
 						emit("imul $" + firstToken + ", %eax");
 					}
 					
-					
 		            emit("movl %eax, " + secondOffset + "(%ebp)");
-		            
-		            
-		            
-
 					
 				}
 				else if(lirOp.equals("Div")){
@@ -471,8 +471,10 @@ public class AsmTranslator {
 					
 					firstToken = tokenizer.nextToken();
 					secondToken = tokenizer.nextToken();
+					
 					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
-					String funcName = getFuncFromCall(firstToken);
+					String className = regToDVPtr.get(removeDot(firstToken)); //getFuncFromCall(firstToken);
+					String funcName = DispatchTableBuilder.getMethodName(className, getVirtualMethodOffset(firstToken));
 					String[] regs = new String[2];
 					
 					if(paramMap != null)
@@ -641,6 +643,29 @@ public class AsmTranslator {
         	emit("sub $" + ml.getVarStackSize(currMethod) + ", %esp");
         }
     	
+    }
+    private static String removeDot(String str) {
+    	int dotIndex = -1;
+    	String ret = str;
+    	if((dotIndex = str.indexOf(".")) != -1) {
+    		ret = str.substring(0,dotIndex-1);
+    	}
+    	return ret;
+    }
+    private void updateRegs(String left, String right) {
+    	if(regToDVPtr.containsKey(removeDot(left))) {
+    		regToDVPtr.put(removeDot(right), regToDVPtr.get(removeDot(left)));
+    	} else {
+    		regToDVPtr.put(removeDot(right), removeDot(left));
+    	}
+    }
+    private static String getVirtualMethodOffset(String str) {
+    	int dotIndex = -1;
+    	String ret = str;
+    	if((dotIndex = str.indexOf(".")) != -1) {
+    		ret = str.substring(dotIndex);
+    	}
+    	return ret;
     }
 	
 }
