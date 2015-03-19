@@ -126,7 +126,7 @@ public class AsmTranslator {
 			while ((line = bufReader.readLine()) != null) {
 				
 				if (line.length() == 0) continue;
-				
+				emit("\n# " + line);
 				if (line.startsWith("#")) {
 					emit(line);
 					if(line.equals("# End Of Method Block"))
