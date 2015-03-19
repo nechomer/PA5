@@ -474,7 +474,7 @@ public class AsmTranslator {
 					
 					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
 					String className = regToDVPtr.get(removeDot(firstToken)); //getFuncFromCall(firstToken);
-					String funcName = DispatchTableBuilder.getMethodName(className, getVirtualMethodOffset(firstToken));
+					String funcName = DispatchTableBuilder.getFuncName(className, getVirtualMethodOffset(firstToken));
 					String[] regs = new String[2];
 					
 					if(paramMap != null)
@@ -659,13 +659,13 @@ public class AsmTranslator {
     		regToDVPtr.put(removeDot(right), removeDot(left));
     	}
     }
-    private static String getVirtualMethodOffset(String str) {
+    private static int getVirtualMethodOffset(String str) {
     	int dotIndex = -1;
     	String ret = str;
     	if((dotIndex = str.indexOf(".")) != -1) {
     		ret = str.substring(dotIndex);
     	}
-    	return ret;
+    	return Integer.parseInt(ret);
     }
 	
 }
