@@ -360,7 +360,7 @@ public class LirTranslator implements Visitor {
 	@Override
 	public Object visit(LocalVariable localVariable) {
 		String lir = "";
-		String[] methodNameAndScope = localVariable.scope.retrieveScopeName();
+		String[] methodNameAndScope = localVariable.scope.retrieveScopeName(localVariable.getName());
 		String methodName = getMethodLabel(methodNameAndScope[0]);
 		methodLayouts.insertVar(methodName, localVariable.getName(), methodNameAndScope[1]);
 		if ( localVariable.hasInitValue() ) {
@@ -437,7 +437,7 @@ public class LirTranslator implements Visitor {
 				
 				return lir;
 			} else {
-				String[] methodNameAndScope = location.scope.retrieveScopeName();
+				String[] methodNameAndScope = location.scope.retrieveScopeName(location.getName());
 				if ( location.isLhs() ) {
 					// variable is assignment target
 					lir = "Move %s, " + location.getName() + "_" + methodNameAndScope[1] + "\n";
@@ -1041,7 +1041,7 @@ public class LirTranslator implements Visitor {
 	}
 	
 	private void addRegsToMethod(FrameScope scope) {
-		String[] methodNameAndScope = scope.retrieveScopeName();
+		String[] methodNameAndScope = scope.retrieveScopeName("");
 		String methodName = getMethodLabel(methodNameAndScope[0]);
 		for (int i = 0; i<= currReg; i++) {
 			methodLayouts.insertVar(methodName, "R" + i, "");
