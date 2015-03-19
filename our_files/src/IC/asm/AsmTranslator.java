@@ -473,14 +473,14 @@ public class AsmTranslator {
 					secondToken = tokenizer.nextToken();
 					
 					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
-					String className = regToDVPtr.get(removeDot(firstToken)); //getFuncFromCall(firstToken);
+					String className = regToDVPtr.get(removeDot(firstToken)); 
 					String funcName = DispatchTableBuilder.getFuncName(className, getVirtualMethodOffset(firstToken));
 					String[] regs = new String[2];
 					
 					if(paramMap != null)
 						pushVars(CurrMethod, funcName, paramMap);
 					
-					getFieldRegs(funcName,regs);
+					getFieldRegs(getFuncFromCall(firstToken),regs);
 					
 					objectOffset = ml.getOffset(CurrMethod, regs[0]);
 					emit("mov " + objectOffset + "(%ebp), %eax");

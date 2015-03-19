@@ -30,8 +30,12 @@ public class DispatchTableBuilder {
 	    return "_DV_" + name;
 	}
 	
-	public static String getFuncName(String className, int offset) {
-		LinkedHashMap<String, Integer> classMap = classMethodOffsets.get(className);
+	public static String getClassName(String dvClassName) {
+		return dvClassName.substring(4);
+	}
+			
+	public static String getFuncName(String dvClassName, int offset) {
+		LinkedHashMap<String, Integer> classMap = classMethodOffsets.get(getClassName(dvClassName));
 		Iterator<String> iter = classMap.keySet().iterator();
 		String result = "";
 		while (iter.hasNext()) {
@@ -39,7 +43,7 @@ public class DispatchTableBuilder {
 			if (classMap.get(funcName) == offset) 
 				result = funcName;
 		}
-		result.replace("#", "");
+		result = result.replace("#", "");
 		return result;
 	}
 	 
