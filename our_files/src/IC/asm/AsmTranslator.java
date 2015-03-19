@@ -184,6 +184,7 @@ public class AsmTranslator {
 					else 
 						getArrayRegs(secondToken, regs);
 					
+					updateRegs(regs[0], secondToken);
 					arrayOffset = ml.getOffset(CurrMethod, regs[0]);
 					indexOffset = ml.getOffset(CurrMethod, regs[1]);
 					destOffset = ml.getOffset(CurrMethod, isLoad? secondToken : firstToken);
@@ -490,8 +491,14 @@ public class AsmTranslator {
 					secondToken = tokenizer.nextToken();
 					
 					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
-					String className = regToDVPtr.get(removeDot(firstToken)); 
-					String funcName = DispatchTableBuilder.getFuncName(className, getVirtualMethodOffset(firstToken));
+					String className = regToDVPtr.get(removeDot(firstToken));
+					String funcName = "";
+					if (null == className) {
+						funcName = "_DV_void";
+					} else {
+						funcName = DispatchTableBuilder.getFuncName(className, getVirtualMethodOffset(firstToken));
+					}
+					
 					String[] regs = new String[2];
 					
 					if(paramMap != null)
