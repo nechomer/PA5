@@ -1,5 +1,6 @@
 package IC.lir;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +28,19 @@ public class DispatchTableBuilder {
 	 */
 	public static String getDispatchTableName(String name) {
 	    return "_DV_" + name;
+	}
+	
+	public static String getFuncName(String className, int offset) {
+		LinkedHashMap<String, Integer> classMap = classMethodOffsets.get(className);
+		Iterator<String> iter = classMap.keySet().iterator();
+		String result = "";
+		while (iter.hasNext()) {
+			String funcName = iter.next();
+			if (classMap.get(funcName) == offset) 
+				result = funcName;
+		}
+		result.replace("#", "");
+		return result;
 	}
 	 
 	/**
