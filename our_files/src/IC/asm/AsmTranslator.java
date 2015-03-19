@@ -729,7 +729,7 @@ public class AsmTranslator {
 		
 		emit("");
 		emit("labelDBE:");
-    	emit("push $strDBE  # error message");
+    	emit("push $str_err_div_by_zero  # error message");
     	emit("call __println");
     	emit("push $1       # error code");
     	emit("call __exit");
