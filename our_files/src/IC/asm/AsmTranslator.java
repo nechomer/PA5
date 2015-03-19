@@ -452,22 +452,28 @@ public class AsmTranslator {
 					
 					firstToken = formatStr(tokenizer.nextToken());
 					secondToken = tokenizer.nextToken();
-					Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
 					String funcName = getFuncFromCall(firstToken);
-					
-					if(paramMap != null)
-						pushVars(CurrMethod, funcName, paramMap);
-					
-					emit("call " + funcName);
-					if(!secondToken.equals("Rdummy")) {
-						
-						firstOffset = ml.getOffset(CurrMethod, secondToken);
-						emit("movl %eax, " + firstOffset + "(%ebp)");
-						
+					if (funcName.equals("__checkNullRef")) {
+						makeCheckNullRef();
+					} else {
+						Map<String,String> paramMap = makeParamsToRegs(getParamsFromCall(firstToken));
+
+
+						if(paramMap != null)
+							pushVars(CurrMethod, funcName, paramMap);
+
+						emit("call " + funcName);
+						if(!secondToken.equals("Rdummy")) {
+
+							firstOffset = ml.getOffset(CurrMethod, secondToken);
+							emit("movl %eax, " + firstOffset + "(%ebp)");
+
+						}
+
+						if(paramMap != null)
+							emit("add $" + 4 * paramMap.size() + ", %esp");
+
 					}
-					
-					if(paramMap != null)
-						emit("add $" + 4 * paramMap.size() + ", %esp");
 				}
 				else if(lirOp.equals("VirtualCall")){
 					
@@ -516,6 +522,7 @@ public class AsmTranslator {
 				}
 			}
 			
+			addCheckLabels();
 			String asmFileName = lirFileName.replaceAll(".ic$", ".s");
 			
 			FileWriter fw = null;
@@ -531,7 +538,8 @@ public class AsmTranslator {
 
 	}
 
-    private void pushVars(String fromFunction, String toFunction, Map<String,String> paramsToRegs) {
+
+	private void pushVars(String fromFunction, String toFunction, Map<String,String> paramsToRegs) {
        
     	List<String> params = ml.getParamsReverseList(toFunction);
         int regOffset = 0;
@@ -670,5 +678,18 @@ public class AsmTranslator {
     	}
     	return Integer.parseInt(ret);
     }
+    private void makeCheckNullRef(){
+    	emit("cmp $0, %eax");
+    	emit("je labelNPE");
+    }
 	
+    private void addCheckLabels() {
+    	emit("");
+		emit("labelNPE:");
+		emit("push $str_err_null_ptr_ref	# error message");
+		emit("call __println");
+		emit("push $1		# error code");
+		emit("call __exit");
+	}
+    
 }

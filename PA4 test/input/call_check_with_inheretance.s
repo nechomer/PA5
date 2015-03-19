@@ -338,10 +338,8 @@ mov -4(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -20(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Move 1, R2
 movl $1, -24(%ebp)
@@ -365,10 +363,8 @@ mov -12(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -20(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Move 1, R2
 movl $1, -24(%ebp)
@@ -392,10 +388,8 @@ mov -16(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -20(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Move 1, R2
 movl $1, -24(%ebp)
@@ -436,10 +430,8 @@ mov -32(%ebp), %eax
 movl %eax, -20(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -20(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # VirtualCall R1.0(), Rdummy
 mov -20(%ebp), %eax
@@ -472,10 +464,8 @@ sub $8, %esp
 movl $str1, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -8(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Library __println(R1), Rdummy
 mov -8(%ebp), %eax
@@ -506,10 +496,8 @@ sub $8, %esp
 movl $str2, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -8(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Library __println(R1), Rdummy
 mov -8(%ebp), %eax
@@ -540,10 +528,8 @@ sub $8, %esp
 movl $str3, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -8(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Library __println(R1), Rdummy
 mov -8(%ebp), %eax
@@ -574,10 +560,8 @@ sub $8, %esp
 movl $str4, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -8(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Library __println(R1), Rdummy
 mov -8(%ebp), %eax
@@ -608,10 +592,8 @@ sub $8, %esp
 movl $str5, -8(%ebp)
 
 # StaticCall __checkNullRef(a=R1), Rdummy
-mov -8(%ebp), %eax
-push %eax
-call __checkNullRef
-add $4, %esp
+cmp $0, %eax
+je labelNPE
 
 # Library __println(R1), Rdummy
 mov -8(%ebp), %eax
@@ -629,3 +611,9 @@ _Z_foo_epilogue:
 mov (%ebp), %esp
 pop (%ebp)
 ret
+
+labelNPE:
+push $str_err_null_ptr_ref	# error message
+call __println
+push $1		# error code
+call __exit
